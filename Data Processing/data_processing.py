@@ -1,7 +1,7 @@
 #%%
 # Imports
 import matplotlib.pyplot as plt
-#from leap_data_helper import *
+from leap_data_helper import *
 import Leap, ctypes, os, sys
 import pandas as pd
 import numpy as np
@@ -9,7 +9,7 @@ import pickle
 import glob
 import cv2
 
-#%% 
+# #%% 
 # Function Definitions
 def load_data(data_files, n_disgard=50):
     data_file_names = glob.glob(data_files)
@@ -88,7 +88,6 @@ def get_joints(frame):
                 joints.append(joint_pos)
     
     return np.array(joints)
-
 
 def get_angles(frame):
     
@@ -181,7 +180,7 @@ def get_angles(frame):
     return np.array(angles)
 
 
-#%% 
+# #%% 
 # Loading in the Data
 person_id = 'p_0'
 gesture_id = 'd'
@@ -209,7 +208,7 @@ with open(data_file, mode='rb') as f:
 
 #%%
 
-img = np.load(img_leap_l_names[np.random.randint(450)])
+img = np.load(images_l_names[np.random.randint(450)])
 # print img.shape
 plt.imshow(img, 'gray')
 
@@ -217,3 +216,91 @@ img = undistort(img, left_coordinates, left_coefficients, 640, 640)
 img = cv2.flip(img, 1)
 plt.figure(figsize=(10,10))
 plt.imshow(img, 'gray')
+
+img_test = np.copy(img)
+img_test[img_test<60] = 0
+img_test = hand_cropping(img_test)
+img_test = np.expand_dims(img_test, 2)
+img_test = resize_img(img_test, 96)
+plt.imshow(img_test,'gray')
+
+plt.axis('off')
+
+
+#%%
+person_id_list = ['p_0', 'p_1', 'p_2', 'p_3', 'p_4']
+gesture_id_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm',
+                   'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
+
+
+## Initialization
+features_l_list = []
+features_r_list = []
+features_angles_list = []
+label_list = []
+
+# (This is a must) Create a controller to connect to the Leap Motion device
+controller = Leap.Controller()
+
+for person_id_i, person_id in enumerate(person_id_list):
+    for gesture_i, gesture_id in enumerate(gesture_id_list):
+        
+        img_leap_l_names = load_data('./'+person_id+'/'+gesture_id+'/leap_raw_images/*_left.npy')
+        img_leap_r_names = load_data('./'+person_id+'/'+gesture_id+'/leap_raw_images/*_right.npy')
+        frame_leap_names = load_data('./'+person_id+'/'+gesture_id+'/leap_frames/*.data')
+        
+        # extract the angle features
+        for frame_name in frame_leap_names:
+            frame = get_frame(frame_name)
+            features_angles_list.append(get_angles(frame))
+                    
+        # raw image left
+        for img_name in img_leap_l_names:
+            
+            img = np.load(img_name)
+            img = undistort(img, left_coordinates, left_coefficients, 640, 640)
+            
+            img[img<60] = 0
+            
+            img = hand_cropping(img)
+            img = np.expand_dims(img, 2)
+            img = resize_img(img, 32)
+            img = normalize_data(img)
+            
+            features_l_list.append(img)
+            label_list.append([person_id_i, gesture_i])
+        
+        # raw images right
+        for img_name in img_leap_r_names:
+            
+            img = np.load(img_name)
+            
+            img = undistort(img, right_coordinates, right_coefficients, 640, 640)
+                
+            img[img<60] = 0
+            
+            img = hand_cropping(img)
+            img = np.expand_dims(img, 2)
+            img = resize_img(img, 32)
+            img = normalize_data(img)
+            
+            features_r_list.append(img)
+
+
+#             cv2.imshow('image', hand_region)
+#             cv2.waitKey(5)
+#             if cv2.waitKey(1) == 27:
+#         #         print canvas_frame.shape
+#                 break
+
+# cv2.destroyAllWindows()
+
+        print ((person_id + ': ' + gesture_id + ' has {} samples, label: {}').format(len(img_leap_l_names), [person_id_i, gesture_i]) )
+
+
+#%%
+pickle.dump( {'features_l': np.array(features_l_list),
+              'features_r': np.array(features_r_list),
+              'features_angles': np.array(features_angles_list),
+              'labels': np.array(label_list)} , 
+            open( "./datasets/dataset.p", "wb" ),)
