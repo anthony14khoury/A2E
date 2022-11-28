@@ -1,54 +1,93 @@
-import cv2
+from leap_data_helper import *
 import numpy as np
+import sys
 import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
+import Leap as Leap
 
-# load saved model from PC
-model = tf.keras.models.load_model(r'/Users/samirziad/IdeaProjects/A2E-ML/A2E/Current Model/model.h5')
-data_dir = 'dataset'
+model = tf.keras.models.load_model(os.path.abspath(os.getcwd()) + "/model.h5")
+data_dir = 'Image_Directory'
 #getting the labels form data directory
 labels = sorted(os.listdir(data_dir))
-labels[-1] = 'Nothing'
-print(labels)
 
-#initiating the video source, 0 for internal camera
-cap = cv2.VideoCapture(0)
-while(True):
+def hand_cropping(img):
 
-    _ , frame = cap.read()
-    cv2.rectangle(frame, (100, 100), (300, 300), (0, 0, 255), 5)
-    #region of intrest
-    roi = frame[100:300, 100:300]
-    img = cv2.resize(roi, (50, 50))
-    cv2.imshow('roi', roi)
+    img = img[200:400, 200:400]
+
+    dist_x = np.sum(img,0)
+    dist_y = np.sum(img,1)
+    span_x = np.where(dist_x>500)
+    span_x_start = np.min(span_x)
+    span_x_end = np.max(span_x)
+    span_y = np.where(dist_y>50)
+    span_y_start = np.min(span_y)
+    span_y_end = np.max(span_y)
+
+    if len(span_y[0])/len(span_x[0]) > 2:
+        span_y_end = int(span_y_start + len(span_x[0])*1.8)
+    return img[span_y_start:span_y_end+1,span_x_start:span_x_end+1]
+
+def undistort(image, coordinate_map, coefficient_map, width, height):
+    #remap image to destination
+    destination = cv2.remap(image,
+                            coordinate_map,
+                            coefficient_map,
+                            interpolation = cv2.INTER_LINEAR)
+
+    #resize output to desired destination size
+    destination = cv2.resize(destination,
+                             (width, height),
+                             0, 0,
+                             cv2.INTER_LINEAR)
+    return destination
+
+class SampleListener(Leap.Listener):
+
+    def on_connect(self, controller):
+        print ("Connected")
+
+    def on_frame(self, controller):
+        print ("Frame available")
+        frame = controller.frame()
+
+        if frame.is_valid:
+            #format received image
+            img = frame.images[0]
+            distortion_buffer = img.Distortion()
+            left_coefficients = distortion_buffer['left_coefficients']
+            img = undistort(img, distortion_buffer, left_coefficients, 640, 640)
+            img[img<60] = 0
+            img = hand_cropping(img)
+            img = np.expand_dims(img, 2)
+            img = resize_img(img, 32)
+            img = normalize_data(img)
+
+            #make predication about the current frame
+            prediction = model.predict(img.reshape(1,50,50,3))
+            char_index = np.argmax(prediction)
+            confidence = round(prediction[0,char_index]*100, 1)
+            predicted_char = labels[char_index]
+            print(predicted_char, confidence)
 
 
-    img = img/255
+    def on_exit(self, controller):
+        print ("Exited")
 
-    #make predication about the current frame
-    prediction = model.predict(img.reshape(1,50,50,3))
-    char_index = np.argmax(prediction)
+listener = SampleListener()
+controller = Leap.Controller()
 
-    confidence = round(prediction[0,char_index]*100, 1)
-    predicted_char = labels[char_index]
-    print(predicted_char, confidence)
+controller.set_policy_flags(Leap.Controller.POLICY_IMAGES)
 
-    font = cv2.FONT_HERSHEY_TRIPLEX
-    fontScale = 1
-    color = (0,255,255)
-    thickness = 2
+# Sample listener receive events from the controller
+controller.add_listener(listener)
 
-    #writing the predicted char and its confidence percentage to the frame
-    msg = predicted_char +', Conf: ' +str(confidence)+' %'
-    cv2.putText(frame, msg, (80, 80), font, fontScale, color, thickness)
+# Keep this process running until Enter is pressed
+print ("Press Enter to quit...")
+try:
+    sys.stdin.readline()
+except KeyboardInterrupt:
+    pass
+finally:
+    # Remove the sample listener when done
+    controller.remove_listener(listener)
 
-    cv2.imshow('frame',frame)
-
-    #close the camera when press 'q'
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        break
-
-#release the camera and close all windows
-cap.release()
-cv2.destroyAllWindows()

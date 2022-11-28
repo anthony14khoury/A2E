@@ -1,15 +1,13 @@
 #%%
 # Imports
-import matplotlib.pyplot as plt
 from leap_data_helper import *
-import Leap, ctypes, os, sys
-import pandas as pd
+import Leap, ctypes, os
 import numpy as np
 import pickle
 import glob
 import cv2
 
-# #%% 
+# #%%
 # Function Definitions
 def load_data(data_files, n_disgard=50):
     data_file_names = glob.glob(data_files)
@@ -186,7 +184,7 @@ person_id = 'p_0'
 gesture_id = 'd'
 num_disgard = 50
 
-dataset_address = "D:/Code/A2E/Dataset"
+dataset_address = os.path.abspath(os.getcwd()) + "/dataset"
 data_address_l_names = "".join([dataset_address, '/', person_id, '/', gesture_id, '/leap_raw_images/*_left.npy'])
 data_address_r_names = "".join([dataset_address, '/', person_id, '/', gesture_id, '/leap_raw_images/*_right.npy'])
 data_address_leap_frame = "".join([dataset_address, '/', person_id, '/', gesture_id, '/leap_frames/*.data'])
@@ -244,46 +242,46 @@ controller = Leap.Controller()
 
 for person_id_i, person_id in enumerate(person_id_list):
     for gesture_i, gesture_id in enumerate(gesture_id_list):
-        
-        img_leap_l_names = load_data('./'+person_id+'/'+gesture_id+'/leap_raw_images/*_left.npy')
-        img_leap_r_names = load_data('./'+person_id+'/'+gesture_id+'/leap_raw_images/*_right.npy')
-        frame_leap_names = load_data('./'+person_id+'/'+gesture_id+'/leap_frames/*.data')
-        
+
+        img_leap_l_names = load_data('./dataset/'+person_id+'/'+gesture_id+'/leap_raw_images/*_left.npy')
+        img_leap_r_names = load_data('./dataset/'+person_id+'/'+gesture_id+'/leap_raw_images/*_right.npy')
+        frame_leap_names = load_data('./dataset/'+person_id+'/'+gesture_id+'/leap_frames/*.data')
+
         # extract the angle features
         for frame_name in frame_leap_names:
             frame = get_frame(frame_name)
             features_angles_list.append(get_angles(frame))
-                    
+
         # raw image left
         for img_name in img_leap_l_names:
-            
+
             img = np.load(img_name)
             img = undistort(img, left_coordinates, left_coefficients, 640, 640)
-            
+
             img[img<60] = 0
-            
+
             img = hand_cropping(img)
             img = np.expand_dims(img, 2)
             img = resize_img(img, 32)
             img = normalize_data(img)
-            
+
             features_l_list.append(img)
             label_list.append([person_id_i, gesture_i])
-        
+
         # raw images right
         for img_name in img_leap_r_names:
-            
+
             img = np.load(img_name)
-            
+
             img = undistort(img, right_coordinates, right_coefficients, 640, 640)
-                
+
             img[img<60] = 0
-            
+
             img = hand_cropping(img)
             img = np.expand_dims(img, 2)
             img = resize_img(img, 32)
             img = normalize_data(img)
-            
+
             features_r_list.append(img)
 
 
@@ -302,5 +300,5 @@ for person_id_i, person_id in enumerate(person_id_list):
 pickle.dump( {'features_l': np.array(features_l_list),
               'features_r': np.array(features_r_list),
               'features_angles': np.array(features_angles_list),
-              'labels': np.array(label_list)} , 
+              'labels': np.array(label_list)} ,
             open( "./datasets/dataset.p", "wb" ),)
