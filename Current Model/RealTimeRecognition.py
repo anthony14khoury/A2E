@@ -1,14 +1,51 @@
 from leap_data_helper import *
 import numpy as np
 import sys
-import tensorflow as tf
+import ctypes
+#import tensorflow as tf
 import os
 import Leap as Leap
 
-model = tf.keras.models.load_model(os.path.abspath(os.getcwd()) + "/model.h5")
-data_dir = 'Image_Directory'
-#getting the labels form data directory
-labels = sorted(os.listdir(data_dir))
+coordinate_map = []
+coordniate_coefficients = []
+maps_initialized = False
+#model = tf.keras.models.load_model(os.path.abspath(os.getcwd()) + "/model.h5")
+#data_dir = 'Image_Directory'
+##getting the labels form data directory
+#labels = sorted(os.listdir(data_dir))
+
+
+
+def convert_distortion_maps(image):
+
+    distortion_length = image.distortion_width * image.distortion_height
+    xmap = np.zeros(distortion_length/2, dtype=np.float32)
+    ymap = np.zeros(distortion_length/2, dtype=np.float32)
+
+    for i in range(0, distortion_length, 2):
+        xmap[distortion_length/2 - i/2 - 1] = image.distortion[i] * image.width
+        ymap[distortion_length/2 - i/2 - 1] = image.distortion[i + 1] * image.height
+
+    xmap = np.reshape(xmap, (image.distortion_height, image.distortion_width/2))
+    ymap = np.reshape(ymap, (image.distortion_height, image.distortion_width/2))
+
+    #resize the distortion map to equal desired destination image size
+    resized_xmap = cv2.resize(xmap,
+                              (image.width, image.height),
+                              0, 0,
+                              cv2.INTER_LINEAR)
+    resized_ymap = cv2.resize(ymap,
+                              (image.width, image.height),
+                              0, 0,
+                              cv2.INTER_LINEAR)
+
+    #Use faster fixed point maps
+    coordinate_map, interpolation_coefficients = cv2.convertMaps(resized_xmap,
+                                                                 resized_ymap,
+                                                                 cv2.CV_32FC1,
+                                                                 nninterpolation = False)
+
+    return coordinate_map, interpolation_coefficients
 
 def hand_cropping(img):
 
@@ -28,8 +65,19 @@ def hand_cropping(img):
     return img[span_y_start:span_y_end+1,span_x_start:span_x_end+1]
 
 def undistort(image, coordinate_map, coefficient_map, width, height):
+    destination = np.empty((width, height), dtype = np.ubyte)
+
+    #wrap image data in numpy array
+    i_address = int(image.data_pointer)
+    ctype_array_def = ctypes.c_ubyte * image.height * image.width
+    # as ctypes array
+    as_ctype_array = ctype_array_def.from_address(i_address)
+    # as numpy array
+    as_numpy_array = np.ctypeslib.as_array(as_ctype_array)
+    img = np.reshape(as_numpy_array, (image.height, image.width))
+
     #remap image to destination
-    destination = cv2.remap(image,
+    destination = cv2.remap(img,
                             coordinate_map,
                             coefficient_map,
                             interpolation = cv2.INTER_LINEAR)
@@ -42,52 +90,56 @@ def undistort(image, coordinate_map, coefficient_map, width, height):
     return destination
 
 class SampleListener(Leap.Listener):
-
     def on_connect(self, controller):
         print ("Connected")
 
     def on_frame(self, controller):
-        print ("Frame available")
-        frame = controller.frame()
+        global maps_initialized
+        global coordinate_map
+        global coordniate_coefficients
 
+        frame = controller.frame()
         if frame.is_valid:
+            image = frame.images[0]
+            if not maps_initialized:
+                coordinate_map, coordinate_coefficients = convert_distortion_maps(image)
+                maps_initialized = True
             #format received image
-            img = frame.images[0]
-            distortion_buffer = img.Distortion()
-            left_coefficients = distortion_buffer['left_coefficients']
-            img = undistort(img, distortion_buffer, left_coefficients, 640, 640)
+            img = undistort(image, coordinate_map, coordniate_coefficients, 400, 400)
             img[img<60] = 0
             img = hand_cropping(img)
             img = np.expand_dims(img, 2)
             img = resize_img(img, 32)
             img = normalize_data(img)
-
             #make predication about the current frame
-            prediction = model.predict(img.reshape(1,50,50,3))
-            char_index = np.argmax(prediction)
-            confidence = round(prediction[0,char_index]*100, 1)
-            predicted_char = labels[char_index]
-            print(predicted_char, confidence)
-
+            # prediction = model.predict(img.reshape(1,50,50,3))
+            # char_index = np.argmax(prediction)
+            # confidence = round(prediction[0,char_index]*100, 1)
+            # predicted_char = labels[char_index]
+            # print(predicted_char, confidence)
 
     def on_exit(self, controller):
         print ("Exited")
 
-listener = SampleListener()
-controller = Leap.Controller()
+def main():
+    listener = SampleListener()
+    controller = Leap.Controller()
 
-controller.set_policy_flags(Leap.Controller.POLICY_IMAGES)
+    controller.set_policy(Leap.Controller.POLICY_IMAGES)
 
-# Sample listener receive events from the controller
-controller.add_listener(listener)
+    # Sample listener receive events from the controller
+    controller.add_listener(listener)
 
-# Keep this process running until Enter is pressed
-print ("Press Enter to quit...")
-try:
-    sys.stdin.readline()
-except KeyboardInterrupt:
-    pass
-finally:
-    # Remove the sample listener when done
-    controller.remove_listener(listener)
+    # Keep this process running until Enter is pressed
+    print ("Press Enter to quit...")
+    try:
+        sys.stdin.readline()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Remove the sample listener when done
+        controller.remove_listener(listener)
 
+
+if __name__ == "__main__":
+    main()
