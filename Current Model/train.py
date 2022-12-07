@@ -74,12 +74,7 @@ model.compile(optimizer = 'adam',
 history = model.fit(X_train, Y_train, epochs=20, verbose=1, validation_data=(X_eval, Y_eval))
 
 #testing
-model.evaluate(X_test, Y_test)
+print(model.evaluate(X_test, Y_test))
 
 #save the model
 model.save(os.path.abspath(os.getcwd())+'/model.h5')
-
-train_loss = history.history['loss']
-train_acc = history.history['accuracy']
-val_loss = history.history['val_loss']
-val_accuracy = history.history['val_accuracy']
