@@ -1,3 +1,7 @@
+# Large Given Dataset
+Dataset/
+Current Model/Image_Directory/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
