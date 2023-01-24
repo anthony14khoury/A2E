@@ -10,6 +10,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Large Given Dataset
+Dataset/
+
+# Ignore Opencv2
+Get_Leap_Image
+
 # Distribution / packaging
 .Python
 build/
