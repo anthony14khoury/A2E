@@ -1,7 +1,3 @@
-# Large Given Dataset
-Dataset/
-Current Model/Image_Directory/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -14,7 +10,7 @@ __pycache__/
 Dataset/
 
 # Ignore Opencv2
-Get_Leap_Image
+Get_Leap_Image/
 
 # Distribution / packaging
 .Python
