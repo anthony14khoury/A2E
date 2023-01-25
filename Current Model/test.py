@@ -3,17 +3,18 @@ from leap_data_helper import *
 import numpy as np
 import sys
 import ctypes
-#import tensorflow as tf
+import tensorflow as tf
 import os
 import Leap as Leap
+import cv2
 
 coordinate_map = []
 coordniate_coefficients = []
 maps_initialized = False
-#model = tf.keras.models.load_model(os.path.abspath(os.getcwd()) + "/model.h5")
-#data_dir = 'Image_Directory'
-##getting the labels form data directory
-#labels = sorted(os.listdir(data_dir))
+model = tf.keras.models.load_model("/home/samir/Documents/A2E/A2E/Current Model/model.h5")
+data_dir = 'Image_Directory'
+#getting the labels form data directory
+labels = sorted(os.listdir("/home/samir/Documents/A2E/A2E/Current Model/Image_Directory"))
 
 
 
@@ -96,17 +97,10 @@ def SampleListener(controller):
         global coordinate_map
         global coordniate_coefficients
 
-        while(not controller.is_connected):
-            pass
-
         frame = controller.frame()
-        print(controller)
         if frame.is_valid:
             image = frame.images[0]
             if not maps_initialized:
-                random = image.distortion_width
-                random2 = image.height
-                print(random)
                 distortion_length = image.distortion_width * image.distortion_height
                 xmap = np.zeros(distortion_length/2, dtype=np.float32)
                 ymap = np.zeros(distortion_length/2, dtype=np.float32)
@@ -135,22 +129,28 @@ def SampleListener(controller):
                                                                             nninterpolation = False)
                 maps_initialized = True
             #format received image
-            img = undistort(image, coordinate_map, coordniate_coefficients, 400, 400)
+            img = undistort(image, coordinate_map, coordniate_coefficients, 640, 640)
             img[img<60] = 0
             img = hand_cropping(img)
             img = np.expand_dims(img, 2)
-            img = resize_img(img, 32)
+            img = resize_img(img,64,48)
             img = normalize_data(img)
+            cv2.imwrite("/home/samir/Documents/A2E/A2E/Current Model/img.jpg",img)
+            sleep(5)
             #make predication about the current frame
-            # prediction = model.predict(img.reshape(1,50,50,3))
-            # char_index = np.argmax(prediction)
-            # confidence = round(prediction[0,char_index]*100, 1)
-            # predicted_char = labels[char_index]
-            # print(predicted_char, confidence)
+            prediction = model.predict(img.reshape(1,32,32,3))
+            char_index = np.argmax(prediction)
+            confidence = round(prediction[0,char_index]*100, 1)
+            predicted_char = labels[char_index]
+            print(predicted_char, confidence)
+            sleep(1)
 
 def main():
     controller = Leap.Controller()
     controller.set_policy(Leap.Controller.POLICY_IMAGES)
+    sleep(15)
+    while not controller.is_policy_set(Leap.Controller.POLICY_IMAGES):
+        pass
  # Keep this process running until Enter is pressed
     print ("Press Enter to quit...")
     try:
