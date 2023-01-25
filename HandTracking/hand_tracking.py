@@ -32,12 +32,8 @@ def create_folders():
             pass
 
 
-class SampleListener(Leap.Listener):
-    def on_connect(self, controller):
-        print ("Connected")
-
-    def on_frame(self, controller):
-
+def SampleListener(controller):
+    while True:
         global count
         global frame_store
         global sequence
@@ -111,30 +107,17 @@ class SampleListener(Leap.Listener):
                         numpy.save(TargetFolder+"/"+LETTER+str(i), set_of_frames)
                     quit()
 
-    def on_exit(self, controller):
-        print ("Exited")
-
 
 def main():
-    # Create a sample listener and controller
-    listener = SampleListener()
+    # Create a controller
     controller = Leap.Controller()
 
-    # Have the sample listener receive events from the controller
-    controller.add_listener(listener)
-
-    # Keep this process running until Enter is pressed
-    print("Press Enter to quit...")
-    try:
-        sys.stdin.readline()
-
-    except KeyboardInterrupt:
+    while not controller.is_connected:
         pass
-
-    finally:
-        # Remove the sample listener when done
-        controller.remove_listener(listener)
-
+    print ("Connected")
+    # Keep this process running until Enter is pressed
+    print ("Press Enter to quit...")
+    SampleListener(controller)
 
 if __name__ == "__main__":
     create_folders()
