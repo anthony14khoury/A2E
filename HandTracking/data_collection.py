@@ -4,7 +4,6 @@ import sys
 import time
 import inspect
 import numpy
-import numpy as np
 from matplotlib import pyplot as plt
 import Leap
 
@@ -19,11 +18,14 @@ count = 0
 frame_store = []
 sequence = 0
 sequence_store = []
-EMPTY_HAND = [[0,0,0],[0,0,0],0,0,0,[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
-LETTER = 'a'
+EMPTY_HAND = [[0,0,0],[0,0,0],0,0,0,[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
+LETTER = "nothing"
+FRAME_COUNT = 30
+SEQUENCE_COUNT = 10
+
 def create_folders():
     DATA_PATH = os.path.join('DataCollection')
-    actions = actions = np.array(['a', 'nothing'])
+    actions = actions = numpy.array(['a', 'nothing'])
 
     for action in actions:
         try:
@@ -33,15 +35,14 @@ def create_folders():
 
 
 def SampleListener(controller):
-    while True:
-        global count
-        global frame_store
-        global sequence
-        global sequence_store
-        frame = controller.frame()
-
-        if frame.is_valid:
-            if count < 30:
+    global count
+    global frame_store
+    global sequence
+    global sequence_store
+    while sequence < SEQUENCE_COUNT:    
+        while count < FRAME_COUNT:
+            frame = controller.frame()
+            if frame.is_valid:
                 frame_store.append([])
                 hands = frame.hands
                 frame_store[count].append(len(hands))
@@ -88,24 +89,24 @@ def SampleListener(controller):
                 else:
                     frame_store[count] = frame_store[count] + rightHand
                 count += 1
-            else:
-                print("Done with Gathering Data for sequence", sequence)
-                sequence_store.append(frame_store)
-                sequence += 1
-                if sequence < 10:
-                    frame_store = []
-                    count = 0
-                    print("Wait 3 seconds")
-                    time.sleep(3)
-                    print("Start again")
-                else:
-                    print("Done with all sequences")
-                    # Write to numpy files
-                    TargetFolder = os.path.join(os.path.join('DataCollection'), LETTER)
-                    for i in range(0,10):
-                        set_of_frames = numpy.asarray(sequence_store[i])
-                        numpy.save(TargetFolder+"/"+LETTER+str(i), set_of_frames)
-                    quit()
+                time.sleep(.1)
+
+        print("Done with Gathering Data for sequence", sequence)
+        sequence_store.append(frame_store)
+        sequence += 1
+        frame_store = []
+        count = 0
+        print("Wait 3 seconds")
+        time.sleep(3)
+        print("Start again")
+                
+    print("Done with all sequences")
+    # Write to numpy files
+    TargetFolder = os.path.join(os.path.join('DataCollection'), LETTER)
+    for i in range(0,SEQUENCE_COUNT):
+        set_of_frames = numpy.array(sequence_store[i])
+        numpy.save(TargetFolder+"/"+LETTER+str(i), set_of_frames)
+    quit()
 
 
 def main():
@@ -115,6 +116,7 @@ def main():
     while not controller.is_connected:
         pass
     print ("Connected")
+    print("Start!")
     # Keep this process running until Enter is pressed
     print ("Press Enter to quit...")
     SampleListener(controller)
