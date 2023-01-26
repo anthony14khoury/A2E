@@ -4,4 +4,4 @@ import tensorflow
 import numpy
 
 LETTERS =numpy.array(['a', 'nothing'])
-label_map = {label:num for num, label in enumerate(LETTERS)}
+label_map = {label:LETTERS for LETTERS, label in enumerate(LETTERS)}
