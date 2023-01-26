@@ -19,13 +19,13 @@ class Params():
         self.sequence = 0
         self.sequence_store = []
         self.EMPTY_HAND = [0] * 198
-        self.LETTER = "a"
+        self.LETTER = "z"
         self.FRAME_COUNT = 30
         self.SEQUENCE_COUNT = 10
 
 def create_folders():
     DATA_PATH = os.path.join('DataCollection')
-    actions = actions = numpy.array(['a', 'nothing'])
+    actions = actions = numpy.array(['a', 'j', 'z', 'nothing'])
 
     for action in actions:
         try:
@@ -40,10 +40,6 @@ def SampleListener(controller, params):
     frame_store    = params.frame_store
     sequence       = params.sequence
     sequence_store = params.sequence_store
-    
-    
-    # while sequence < params.SEQUENCE_COUNT:   
-        # while count < params.FRAME_COUNT:
     
     for i in range(params.SEQUENCE_COUNT):  # Looping through number of sequences
         
@@ -106,17 +102,16 @@ def SampleListener(controller, params):
                 else:
                     frame_store[count] = frame_store[count] + rightHand
                 
-                count += 1
                 
-                # Waiting in-between frames for 0.1 seconds
-                time.sleep(.1)
+            # Waiting in-between frames for 0.1 seconds
+            time.sleep(.1)
 
+        print("Done with gathering data for sequence: ", sequence)
         sequence_store.append(frame_store)
         sequence += 1
         frame_store = []
         count = 0
-        
-        print("Done with gathering data for sequence: ", sequence)
+
         print("Wait 3 seconds")
         time.sleep(3)
         print("Start again")
@@ -124,12 +119,12 @@ def SampleListener(controller, params):
     print("Done with all sequences")
     
     print("Writing to numpy Files")
-    # target_folder = os.path.join(os.path.join('DataCollection'), params.LETTER)
-    # for i in range(0, params.SEQUENCE_COUNT):
-    #     set_of_frames = numpy.array(sequence_store[i])
-    #     numpy.save(target_folder + "/" + params.LETTER+str(i), set_of_frames)
+    target_folder = os.path.join(os.path.join('DataCollection'), params.LETTER)
+    for i in range(0, params.SEQUENCE_COUNT):
+        set_of_frames = numpy.array(sequence_store[i])
+        numpy.save(target_folder + "/" + params.LETTER+str(i), set_of_frames)
     
-    # Done gathering data
+    #Done gathering data
     quit()
 
 
@@ -144,12 +139,11 @@ def main():
     print("Waiting for controller to connect")
     while not controller.is_connected:
         pass
+    time.sleep(5)
     
     print ("Controller is connected")
     print("Start!")
     
-    # Keep this process running until Enter is pressed
-    print ("Press Enter to quit...")
     SampleListener(controller, params)
 
 if __name__ == "__main__":
