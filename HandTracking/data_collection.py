@@ -1,10 +1,8 @@
 import os
-import cv2
 import sys
 import time
 import inspect
 import numpy
-from matplotlib import pyplot as plt
 
 # Configurations to Install Leap
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
