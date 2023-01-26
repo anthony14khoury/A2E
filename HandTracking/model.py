@@ -8,7 +8,7 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
-LETTERS = np.array(['a', 'j', 'z', 'nothing'])
+LETTERS = np.array(['a', 'j', 'nothing', 'z'])
 label_map = {label:LETTERS for LETTERS, label in enumerate(LETTERS)}
 sequence_length = 30
 samples_length = 10
