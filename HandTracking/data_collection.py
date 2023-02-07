@@ -12,69 +12,84 @@ sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
 
-
 def SampleListener(controller, params):
     
-    for i in range(params.SEQUENCE_COUNT):  # Looping through number of sequences
+    # Looping through signs
+    for sign in params.SIGNS:
+    
+        # Looping through number of sequences (10)
+        for i in range(params.SEQUENCE_COUNT):
+            
+            print("Start Data Collection for letter: {} | Sequence: {}".format(sign, i))
+            
+            # Looping through number of frames (30)
+            for count in range(params.FRAME_COUNT):
+                
+                # Accessing Frame Object from Leap API
+                frame = controller.frame()
+                
+                # Checking if the Frame is Valid
+                if frame.is_valid:
+                    
+                    # Function Retuning all of the Tracked Values (198)
+                    params.FRAME_STORE = hand_tracking(frame, params.FRAME_STORE, count, params, True)
+                    
+                    # Allows for a consistent capture of frames
+                    time.sleep(0.1)
+                
+                else:
+                    print("Error: frame is not valid")
+                    quit()
+                    
+            print("Done \n")
+            params.SEQUENCE_STORE.append(params.FRAME_STORE)
+            params.FRAME_STORE = []
+
+            print("Wait 3 seconds \n")
+            time.sleep(3)
+
+        print("Done with All Sequences for {}".format(sign))
         
-        for count in range(params.FRAME_COUNT): # Looping through number of frames
+        print("Writing to numpy Files")
+        target_folder = os.path.join(os.path.join('DataCollection'), sign)
+        for i in range(params.SEQUENCE_COUNT):
+            set_of_frames = numpy.array(params.SEQUENCE_STORE[i])
+            numpy.save(target_folder + "/" + sign + str(i), set_of_frames)
             
-            frame = controller.frame()  # Get frame object
             
-            if frame.is_valid:
-                
-                params.frame_store = hand_tracking(frame, params.frame_store, count, params)
-                
-            time.sleep(0.1)
+        # Clearing Variables for Next Letter of Data Collection
+        params.SEQUENCE_STORE = []
 
-        print("Done with gathering data for sequence: ", params.sequence)
-        params.sequence_store.append(params.frame_store)
-        params.sequence += 1
-        params.frame_store = []
-
-
-        print("Wait 3 seconds")
-        time.sleep(3)
-        print("Start again")
-
-   
-    print("Done with all sequences")
-    
-    
-    
-    print("Writing to numpy Files")
-    target_folder = os.path.join(os.path.join('DataCollection'), params.LETTER)
-    for i in range(0, params.SEQUENCE_COUNT):
-        set_of_frames = numpy.array(params.sequence_store[i])
-        numpy.save(target_folder + "/" + params.LETTER+str(i), set_of_frames)
-
-
+    print("\n Program is Finished \n")
     quit()
-
-
-def main():
     
-    # Class Instantiation
-    params = Params()
-    
-    # Create a controller
-    controller = Leap.Controller()
-    
-    print("Waiting for controller to connect")
-    while not controller.is_connected:
-        pass
-    time.sleep(5)
-    
-    print ("Controller is connected")
-    print("Start!")
-    
-    SampleListener(controller, params)
 
 
 if __name__ == "__main__":
+    print("Program is Running:")
     
-    actions = ['a', 'j', 'z', 'nothing']
+    signs = ['l']
     folder = 'DataCollection'
     
-    create_folders(folder, actions)
-    main()
+    print("\t Create Folders for Signs")
+    create_folders(folder, signs)
+    
+    # Class Instantiation
+    params = Params()
+    params.SIGNS = signs
+    
+    # # Create a controller
+    controller = Leap.Controller()
+    
+    print("\t Waiting for controller to connect")
+    while not controller.is_connected:
+        pass
+    print ("\t Controller is connected")
+    
+    
+    print("\t Double Checking the Connection")
+    time.sleep(3.0)
+    
+    print("\t Done and Starting Data Collection \n")
+    
+    SampleListener(controller, params)

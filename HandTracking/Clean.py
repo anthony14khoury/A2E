@@ -10,14 +10,15 @@ import Leap
 
 class Params():
      def __init__(self):
-          self.count = 0
-          self.frame_store = []
-          self.sequence = 0
-          self.sequence_store = []
+          # self.count = 0
+          self.FRAME_STORE = []
+          # self.sequence = 0
+          self.SEQUENCE_STORE = []
           self.EMPTY_HAND = [0] * 198
-          self.LETTER = "j"
+          # self.LETTER = ""
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 10
+          self.SIGNS = []
 
 
 def create_folders(folder, actions):
@@ -30,9 +31,10 @@ def create_folders(folder, actions):
           except:
                pass
           
-def hand_tracking(frame, frame_store, count, params):
+def hand_tracking(frame, frame_store, count, params, detail):
      
-     hands = frame.hands # Get hands object
+     # Accessing Hand Object from Leap API
+     hands = frame.hands
      
      frame_store.append([])
      frame_store[count].extend([len(hands), len(frame.fingers)])
@@ -76,13 +78,26 @@ def hand_tracking(frame, frame_store, count, params):
                          rightHand.extend([bone.next_joint[0], bone.next_joint[1], bone.next_joint[1]])
                          rightHand.extend([bone.direction[0], bone.direction[1], bone.direction[1]])
           
-          if len(leftHand) == 0:
-               frame_store[count] = frame_store[count] + params.EMPTY_HAND
-          else:
-               frame_store[count] = frame_store[count] + leftHand
-          if len(rightHand) == 0:
-               frame_store[count] = frame_store[count] + params.EMPTY_HAND
-          else:
-               frame_store[count] = frame_store[count] + rightHand
+     if len(leftHand) == 0:
+          frame_store[count] = frame_store[count] + params.EMPTY_HAND
+     else:
+          frame_store[count] = frame_store[count] + leftHand
+     
+     if len(rightHand) == 0:
+          frame_store[count] = frame_store[count] + params.EMPTY_HAND
+     else:
+          frame_store[count] = frame_store[count] + rightHand
+     
+     if detail == True:
+          
+          print("Number of Hands Present: ", len(hands))
+          for hand in hands:
+               if hand.is_left:
+                    # print("Left Hand Present")
+                    print("Number of finders detected in left hand: ", len(hand.fingers))
+                         
+               elif hand.is_right:
+                    # print("Right Hand Present")
+                    print("Number of finders detected in right hand: ", len(hand.fingers))
      
      return frame_store
