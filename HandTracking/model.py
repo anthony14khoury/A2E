@@ -10,10 +10,10 @@ from keras.optimizers import SGD
 print("Imports and Dependences Installed")
 
 
-LETTERS = np.array(['g', 'l', 'nothing'])
+LETTERS = np.array(['a', 'b', 'nothing'])
 label_map = {label:LETTERS for LETTERS, label in enumerate(LETTERS)}
 sequence_length = 30
-samples_length = 10
+samples_length = 20
 sequences, labels = [], []
 
 print("Organizing Model Inputs")
@@ -25,7 +25,7 @@ for letter in LETTERS:
         res = np.load(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
         sequences.append(res)
         labels.append(label_map[letter])
-        # print(letter, " ", res.shape)
+        print(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
 
 X = np.array(sequences)
 y = to_categorical(labels).astype(int)
@@ -34,32 +34,21 @@ y = to_categorical(labels).astype(int)
 print ("\t Train Test Split")
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
 
-# log_dir = os.path.join('Logs')
 
-print("\t Defining Model")
+# print("\t Defining Model")
 model = Sequential()
-# model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,398)))
-# model.add(LSTM(128, return_sequences=True, activation='relu'))
-# model.add(LSTM(256, return_sequences=True, activation='relu'))
-# model.add(LSTM(512, return_sequences=True, activation='relu'))
-# model.add(LSTM(256, return_sequences=False, activation='relu'))
-# model.add(Dense(128, activation='relu'))
-# model.add(Dense(64, activation='relu'))
-# model.add(Dense(32, activation='relu'))
-# model.add(Dense(LETTERS.shape[0], activation='softmax'))
-model = Sequential()
-model.add(LSTM(64, return_sequences=True, activation='sigmoid', input_shape=(30,398)))
-model.add(LSTM(128, return_sequences=True, activation='sigmoid'))
-model.add(LSTM(64, return_sequences=False, activation='sigmoid'))
+model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,398)))
+model.add(LSTM(128, return_sequences=True, activation='relu'))
+model.add(LSTM(64, return_sequences=False, activation='relu'))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(LETTERS.shape[0], activation='softmax'))
 
-print("\t Compiling and Fitting Model")
+# print("\t Compiling and Fitting Model")
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-model.fit(X_train, y_train, epochs=150)
+model.fit(X_train, y_train, epochs=500)
 
 model.summary()
 
 print("Saving Model")
-model.save('g_l_nothing.h5')
+model.save('abnothing.h5')

@@ -45,8 +45,8 @@ def SampleListener(controller, params):
             params.SEQUENCE_STORE.append(params.FRAME_STORE)
             params.FRAME_STORE = []
 
-            print("Wait 3 seconds \n")
-            time.sleep(3)
+            print("Wait 1 seconds \n")
+            time.sleep(0.0)
 
         print("Done with All Sequences for {}".format(sign))
         
@@ -68,7 +68,7 @@ def SampleListener(controller, params):
 if __name__ == "__main__":
     print("Program is Running:")
     
-    signs = ['l']
+    signs = ['nothing']
     folder = 'DataCollection'
     
     print("\t Create Folders for Signs")

@@ -17,7 +17,7 @@ class Params():
           self.EMPTY_HAND = [0] * 198
           # self.LETTER = ""
           self.FRAME_COUNT = 30
-          self.SEQUENCE_COUNT = 10
+          self.SEQUENCE_COUNT = 20
           self.SIGNS = []
 
 
