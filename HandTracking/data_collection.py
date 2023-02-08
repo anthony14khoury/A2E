@@ -3,155 +3,93 @@ import sys
 import time
 import inspect
 import numpy
+from Clean import Params, create_folders, hand_tracking
 
 # Configurations to Install Leap
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = './x64'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
-# print(os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
 
-class Params():
-    def __init__(self):
-        self.count = 0
-        self.frame_store = []
-        self.sequence = 0
-        self.sequence_store = []
-        self.EMPTY_HAND = [0] * 198
-        self.LETTER = "a"
-        self.FRAME_COUNT = 30
-        self.SEQUENCE_COUNT = 10
-
-def create_folders():
-    DATA_PATH = os.path.join('DataCollection')
-    actions = actions = numpy.array(['a', 'nothing'])
-
-    for action in actions:
-        try:
-            os.makedirs(os.path.join(DATA_PATH, action))
-        except:
-            pass
-
-
 def SampleListener(controller, params):
     
-    count          = params.count
-    frame_store    = params.frame_store
-    sequence       = params.sequence
-    sequence_store = params.sequence_store
+    # Looping through signs
+    for sign in params.SIGNS:
     
-    
-    # while sequence < params.SEQUENCE_COUNT:   
-        # while count < params.FRAME_COUNT:
-    
-    for i in range(params.SEQUENCE_COUNT):  # Looping through number of sequences
-        
-        for count in range(params.FRAME_COUNT): # Looping through number of frames
+        # Looping through number of sequences (10)
+        for i in range(params.SEQUENCE_COUNT):
             
-            frame = controller.frame()  # Get frame object
+            print("Start Data Collection for letter: {} | Sequence: {}".format(sign, i))
             
-            if frame.is_valid:
+            # Looping through number of frames (30)
+            for count in range(params.FRAME_COUNT):
                 
-                hands = frame.hands # Get hands object
+                # Accessing Frame Object from Leap API
+                frame = controller.frame()
                 
-                frame_store.append([])
-                frame_store[count].extend([len(hands), len(frame.fingers)])
+                # Checking if the Frame is Valid
+                if frame.is_valid:
+                    
+                    # Function Retuning all of the Tracked Values (198)
+                    params.FRAME_STORE = hand_tracking(frame, params.FRAME_STORE, count, params, True)
+                    
+                    # Allows for a consistent capture of frames
+                    time.sleep(0.1)
                 
-                leftHand, rightHand = [], []
-                
-                # Looping through hands
-                for hand in hands:
-                    if hand.is_left:
-                        leftHand.extend(hand.palm_normal[0], hand.palm_normal[1], hand.palm_normal[2])
-                        leftHand.extend(hand.direction[0], hand.direction[1], hand.direction[2])
-                        leftHand.append(hand.direction.pitch * Leap.RAD_TO_DEG)
-                        leftHand.append(hand.palm_normal.roll * Leap.RAD_TO_DEG)
-                        leftHand.append(hand.direction.yaw * Leap.RAD_TO_DEG)
-                        leftHand.extend(hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2])
-                        leftHand.extend(hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2])
-                        leftHand.extend(hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2])
-
-                        for finger in hand.fingers:
-                            for boneIndex in range(0, 4):
-                                bone = finger.bone(boneIndex) # Get bone object
-                                leftHand.extend(bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[2])
-                                leftHand.extend(bone.next_joint[0], bone.next_joint[1], bone.next_joint[2])
-                                leftHand.extend(bone.direction[0], bone.direction[1], bone.direction[2])
-
-                    else:
-                        rightHand.extend(hand.palm_normal[0], hand.palm_normal[1], hand.palm_normal[2])
-                        rightHand.extend(hand.direction[0], hand.direction[1], hand.direction[2])
-                        rightHand.append(hand.direction.pitch * Leap.RAD_TO_DEG)
-                        rightHand.append(hand.palm_normal.roll * Leap.RAD_TO_DEG)
-                        rightHand.append(hand.direction.yaw * Leap.RAD_TO_DEG)
-                        rightHand.extend(hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2])
-                        rightHand.extend(hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2])
-                        rightHand.extend(hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2])
-
-
-                        for finger in hand.fingers:
-                            for boneIndex in range(0, 4):
-                                bone = finger.bone(boneIndex)
-                                rightHand.extend(bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[1])
-                                rightHand.extend(bone.next_joint[0], bone.next_joint[1], bone.next_joint[1])
-                                rightHand.extend(bone.direction[0], bone.direction[1], bone.direction[1])
-                
-                if len(leftHand) == 0:
-                    frame_store[count] = frame_store[count] + params.EMPTY_HAND
                 else:
-                    frame_store[count] = frame_store[count] + leftHand
-                if len(rightHand) == 0:
-                    frame_store[count] = frame_store[count] + params.EMPTY_HAND
-                else:
-                    frame_store[count] = frame_store[count] + rightHand
-                
-                count += 1
-                
-                # Waiting in-between frames for 0.1 seconds
-                time.sleep(.1)
+                    print("Error: frame is not valid")
+                    quit()
+                    
+            print("Done \n")
+            params.SEQUENCE_STORE.append(params.FRAME_STORE)
+            params.FRAME_STORE = []
 
-        sequence_store.append(frame_store)
-        sequence += 1
-        frame_store = []
-        count = 0
+            print("Wait 1 seconds \n")
+            time.sleep(0.0)
+
+        print("Done with All Sequences for {}".format(sign))
         
-        print("Done with gathering data for sequence: ", sequence)
-        print("Wait 3 seconds")
-        time.sleep(3)
-        print("Start again")
-                
-    print("Done with all sequences")
-    
-    print("Writing to numpy Files")
-    # target_folder = os.path.join(os.path.join('DataCollection'), params.LETTER)
-    # for i in range(0, params.SEQUENCE_COUNT):
-    #     set_of_frames = numpy.array(sequence_store[i])
-    #     numpy.save(target_folder + "/" + params.LETTER+str(i), set_of_frames)
-    
-    # Done gathering data
+        print("Writing to numpy Files")
+        target_folder = os.path.join(os.path.join('DataCollection'), sign)
+        for i in range(params.SEQUENCE_COUNT):
+            set_of_frames = numpy.array(params.SEQUENCE_STORE[i])
+            numpy.save(target_folder + "/" + sign + str(i), set_of_frames)
+            
+            
+        # Clearing Variables for Next Letter of Data Collection
+        params.SEQUENCE_STORE = []
+
+    print("\n Program is Finished \n")
     quit()
+    
 
 
-def main():
+if __name__ == "__main__":
+    print("Program is Running:")
+    
+    signs = ['nothing']
+    folder = 'DataCollection'
+    
+    print("\t Create Folders for Signs")
+    create_folders(folder, signs)
     
     # Class Instantiation
     params = Params()
+    params.SIGNS = signs
     
-    # Create a controller
+    # # Create a controller
     controller = Leap.Controller()
     
-    print("Waiting for controller to connect")
+    print("\t Waiting for controller to connect")
     while not controller.is_connected:
         pass
+    print ("\t Controller is connected")
     
-    print ("Controller is connected")
-    print("Start!")
     
-    # Keep this process running until Enter is pressed
-    print ("Press Enter to quit...")
+    print("\t Double Checking the Connection")
+    time.sleep(3.0)
+    
+    print("\t Done and Starting Data Collection \n")
+    
     SampleListener(controller, params)
-
-if __name__ == "__main__":
-    create_folders()
-    main()

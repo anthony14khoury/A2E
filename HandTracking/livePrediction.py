@@ -1,95 +1,67 @@
-import tensorflow as tf
 import os
-import Leap as Leap
 import time
 import numpy as np
+from Clean import hand_tracking, Params
+import inspect, sys
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+from keras.optimizers import SGD
+import keras
+from keras.models import load_model
+from keras.utils import CustomObjectScope
 
-model = tf.keras.models.load_model("action.h5")
-#getting the labels form data directory
-labels = sorted(os.listdir("DataCollection"))
-EMPTY_HAND = [0]*198
-def SampleListener(controller):
-    while True:
-        frame_store = []
-        for count in range(30):  # Looping through number of sequences
-            frame = controller.frame()  # Get frame object
-            if frame.is_valid:
-                frame_store.append([])
-                hands = frame.hands     # Get hands object
-                frame_store[count].extend([len(hands), len(frame.fingers)])
+# Configurations to Install Leap
+src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+arch_dir = './x64'
+sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
-                leftHand, rightHand = [], []
+import Leap
 
-                # Looping through hands
-                for hand in hands:
-                    if hand.is_left:
-                        leftHand.extend([hand.palm_normal[0], hand.palm_normal[1], hand.palm_normal[2]])
-                        leftHand.extend([hand.direction[0], hand.direction[1], hand.direction[2]])
-                        leftHand.append(hand.direction.pitch * Leap.RAD_TO_DEG)
-                        leftHand.append(hand.palm_normal.roll * Leap.RAD_TO_DEG)
-                        leftHand.append(hand.direction.yaw * Leap.RAD_TO_DEG)
-                        leftHand.extend([hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2]])
-                        leftHand.extend([hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2]])
-                        leftHand.extend([hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2]])
+model = load_model('g_l_nothing.h5')# #getting the labels form data directory
+# labels = sorted(os.listdir("DataCollection"))
+labels = ['g', 'l', 'nothing']
 
-                        for finger in hand.fingers:
-                            for boneIndex in range(0, 4):
-                                bone = finger.bone(boneIndex) # Get bone object
-                                leftHand.extend([bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[2]])
-                                leftHand.extend([bone.next_joint[0], bone.next_joint[1], bone.next_joint[2]])
-                                leftHand.extend([bone.direction[0], bone.direction[1], bone.direction[2]])
+def SampleListener(controller, params):
+    
+     while True:
+        
+          params.frame_store = []
+        
+          for count in range(30):  # Looping through number of sequences
+            
+               frame = controller.frame()  # Get frame object
+               if frame.is_valid:
+                    
+                    params.frame_store = hand_tracking(frame, params.frame_store, count, params, False)
+               
+               time.sleep(0.1)
 
-                    else:
-                        rightHand.extend([hand.palm_normal[0], hand.palm_normal[1], hand.palm_normal[2]])
-                        rightHand.extend([hand.direction[0], hand.direction[1], hand.direction[2]])
-                        rightHand.append(hand.direction.pitch * Leap.RAD_TO_DEG)
-                        rightHand.append(hand.palm_normal.roll * Leap.RAD_TO_DEG)
-                        rightHand.append(hand.direction.yaw * Leap.RAD_TO_DEG)
-                        rightHand.extend([hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2]])
-                        rightHand.extend([hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2]])
-                        rightHand.extend([hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2]])
-
-
-                        for finger in hand.fingers:
-                            for boneIndex in range(0, 4):
-                                bone = finger.bone(boneIndex)
-                                rightHand.extend([bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[1]])
-                                rightHand.extend([bone.next_joint[0], bone.next_joint[1], bone.next_joint[1]])
-                                rightHand.extend([bone.direction[0], bone.direction[1], bone.direction[1]])
-
-                if len(leftHand) == 0:
-                    frame_store[count] = frame_store[count] + EMPTY_HAND
-                else:
-                    frame_store[count] = frame_store[count] + leftHand
-                if len(rightHand) == 0:
-                    frame_store[count] = frame_store[count] + EMPTY_HAND
-                else:
-                    frame_store[count] = frame_store[count] + rightHand
-
-                # Waiting in-between frames for 0.1 seconds
-                time.sleep(.1)
-
-        # predict
-        input = np.array(frame_store)
-        prediction = model.predict(np.expand_dims(frame_store,axis=0))
-        char_index = np.argmax(prediction)
-        confidence = round(prediction[0,char_index]*100, 1)
-        predicted_char = labels[char_index]
-        print(predicted_char, confidence)
+          # predict
+          # input = np.array(frame_store)
+          prediction = model.predict(np.expand_dims(params.frame_store,axis=0))
+          char_index = np.argmax(prediction)
+          confidence = round(prediction[0,char_index]*100, 1)
+          predicted_char = labels[char_index]
+          print(predicted_char, confidence)
 
 
 def main():
-    # Create a controller
-    controller = Leap.Controller()
+    
+     # Class Instantiation
+     params = Params()
+     
+     # Create a controller
+     controller = Leap.Controller()
 
-    print("Waiting for controller to connect")
-    while not controller.is_connected:
-        pass
-    time.sleep(5)
-    print ("Controller is connected")
+     print("Waiting for controller to connect")
+     while not controller.is_connected:
+          pass
+     
+     print ("Controller is connected")
+     time.sleep(2)
 
-    # Keep this process running until Enter is pressed
-    SampleListener(controller)
+     # Keep this process running until Enter is pressed
+     SampleListener(controller, params)
 
 if __name__ == "__main__":
     main()
