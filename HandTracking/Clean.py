@@ -10,16 +10,12 @@ import Leap
 
 class Params():
      def __init__(self):
-          # self.count = 0
           self.FRAME_STORE = []
-          # self.sequence = 0
           self.SEQUENCE_STORE = []
           self.EMPTY_HAND = [0] * 198
-          # self.LETTER = ""
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 20
           self.SIGNS = []
-
 
 def create_folders(folder, actions):
      DATA_PATH = os.path.join(folder)
