@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import inspect
+# import tensorflow as tf
 import numpy
 from Clean import Params, create_folders, hand_tracking
 
@@ -46,7 +47,7 @@ def SampleListener(controller, params):
             params.FRAME_STORE = []
 
             print("Wait 1 seconds \n")
-            time.sleep(0.0)
+            time.sleep(3.0)
 
         print("Done with All Sequences for {}".format(sign))
         

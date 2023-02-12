@@ -7,6 +7,7 @@ arch_dir = './x64'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
+# 158
 
 class Params():
      def __init__(self):
@@ -48,6 +49,7 @@ def hand_tracking(frame, frame_store, count, params, detail):
                leftHand.extend([hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2]])
                leftHand.extend([hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2]])
                leftHand.extend([hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2]])
+               # 18
 
                for finger in hand.fingers:
                     for boneIndex in range(0, 4):
@@ -55,6 +57,7 @@ def hand_tracking(frame, frame_store, count, params, detail):
                          leftHand.extend([bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[2]])
                          leftHand.extend([bone.next_joint[0], bone.next_joint[1], bone.next_joint[2]])
                          leftHand.extend([bone.direction[0], bone.direction[1], bone.direction[2]])
+                         # 5 * 5 * 3
 
           else:
                rightHand.extend([hand.palm_normal[0], hand.palm_normal[1], hand.palm_normal[2]])
@@ -65,6 +68,7 @@ def hand_tracking(frame, frame_store, count, params, detail):
                rightHand.extend([hand.arm.direction[0], hand.arm.direction[1], hand.arm.direction[2]])
                rightHand.extend([hand.arm.wrist_position[0], hand.arm.wrist_position[1], hand.arm.wrist_position[2]])
                rightHand.extend([hand.arm.elbow_position[0], hand.arm.elbow_position[1], hand.arm.elbow_position[2]])
+               # 18
 
 
                for finger in hand.fingers:
@@ -73,6 +77,8 @@ def hand_tracking(frame, frame_store, count, params, detail):
                          rightHand.extend([bone.prev_joint[0], bone.prev_joint[1], bone.prev_joint[1]])
                          rightHand.extend([bone.next_joint[0], bone.next_joint[1], bone.next_joint[1]])
                          rightHand.extend([bone.direction[0], bone.direction[1], bone.direction[1]])
+                         
+               # 10* 5 * 5
           
      if len(leftHand) == 0:
           frame_store[count] = frame_store[count] + params.EMPTY_HAND
