@@ -30,16 +30,16 @@ def SampleListener(controller, params):
             
                frame = controller.frame()  # Get frame object
                if frame.is_valid:
-                    
+
                     params.frame_store = hand_tracking(frame, params.frame_store, count, params, False)
-		    print(params.frame_store[count][0])           
+		            print(params.frame_store[count][0])
                time.sleep(0.1)
 
           # predict
           # input = np.array(frame_store)
           prediction = model.predict(np.expand_dims(params.frame_store,axis=0))
-	  print(prediction)
-	  char_index = np.argmax(prediction)
+          print(prediction)
+          char_index = np.argmax(prediction)
           confidence = round(prediction[0,char_index]*100, 1)
           predicted_char = labels[char_index]
           print("PREDICTION:",predicted_char, confidence)
