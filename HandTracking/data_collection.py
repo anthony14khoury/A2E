@@ -17,7 +17,7 @@ def SampleListener(controller, params):
     # Looping through signs
     for sign in params.SIGNS:
     
-        # Looping through number of sequences (10)
+        # Looping through number of sequences (20)
         for i in range(params.SEQUENCE_COUNT):
             
             print("Start Data Collection for letter: {} | Sequence: {}".format(sign, i))
@@ -31,7 +31,7 @@ def SampleListener(controller, params):
                 # Checking if the Frame is Valid
                 if frame.is_valid:
                     
-                    # Function Retuning all of the Tracked Values (198)
+                    # Function Retuning all of the Tracked Values (438)
                     params.FRAME_STORE = hand_tracking(frame, params.FRAME_STORE, count, params, True)
                     
                     # Allows for a consistent capture of frames
@@ -43,7 +43,7 @@ def SampleListener(controller, params):
                     
             print("Done \n")
             params.SEQUENCE_STORE.append(params.FRAME_STORE)
-            params.FRAME_STORE = []
+	    params.FRAME_STORE = []
 
             print("Wait 1 seconds \n")
             time.sleep(0.0)
@@ -68,7 +68,7 @@ def SampleListener(controller, params):
 if __name__ == "__main__":
     print("Program is Running:")
     
-    signs = ['nothing']
+    signs = ['c']
     folder = 'DataCollection'
     
     print("\t Create Folders for Signs")
