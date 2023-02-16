@@ -101,7 +101,7 @@ def prediction(params, model, letters):
 
 def main():
      
-     model = load_model('abcefjnothing2.h5')
+     model = load_model('./Models/abcefjnothing2.h5')
      letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
     
      # Class Instantiation
