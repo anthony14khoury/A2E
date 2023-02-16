@@ -7,7 +7,7 @@ import time
 import mediapipe as mp
 from parameters import Params
 
-mp_holistic = mp.solutions.holistic 
+mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
