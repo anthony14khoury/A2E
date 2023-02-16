@@ -4,7 +4,7 @@ import os
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
-from parameters import Params
+from parameters import Params 
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
