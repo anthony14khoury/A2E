@@ -63,14 +63,15 @@ def draw_styled_landmarks(image, results):
                               )
 
 def prediction(params, model, letters):
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # connect to socket
         s.connect((HOST, PORT))
 
         # Set mediapipe model
-        with mp_holistic.Holistic(model_complexity = 0, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 
-            cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+            cap = cv2.VideoCapture(0, cv2.CAP_ANY)
 
             # Wait until camera is connected
             while not cap.isOpened():
@@ -134,8 +135,7 @@ def prediction(params, model, letters):
 
 
 def main():
-
-    model = load_model('./Models/abcefjnothing2.h5')
+    model = load_model('abcefjnothing2.h5')
     letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
 
     # Class Instantiation
