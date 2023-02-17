@@ -5,7 +5,7 @@ from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
 from keras.callbacks import EarlyStopping
-
+import matplotlib.pyplot as plt
 
 def gathering_data(letters, samples_length, label_map):
     sequences, labels = [], []
@@ -44,10 +44,27 @@ def compute_model(X, y, letters):
     # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
     history = model.fit(X_train, y_train, epochs=100, verbose=1, validation_data=(X_test, y_test))
 
+    print("Plot Learning Curves")
+    plt.plot(history.history['categorical_accuracy'])
+    plt.plot(history.history['val_categorical_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('accuracy_history.png')
+
+    # summarize history for loss
+    plt.clf()
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('loss_history.png')
+
     print("Saving Model")
     model.save('abcefjnothing2.h5')
-    
-    return history
 
 
 if __name__ == "__main__":
@@ -63,10 +80,7 @@ if __name__ == "__main__":
     y = to_categorical(labels).astype(int)
     
     print("\t Creating and Saving the ML Model:")
-    history = compute_model(X, y, letters)
-    
-    print("Plot Learning Curves")
-    
+    compute_model(X, y, letters)
     
     
 

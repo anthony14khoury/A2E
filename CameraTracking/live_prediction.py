@@ -66,16 +66,20 @@ def prediction(params, model, letters):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # connect to socket
         s.connect((HOST, PORT))
+
         # Set mediapipe model
         with mp_holistic.Holistic(model_complexity = 0, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 
-            #  cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+
+            # Wait until camera is connected
+            while not cap.isOpened():
+                pass
+
             print("\nCamera is connected and Everything is Configured!")
+
             print("Beginning Predictions:\n")
-
             while cap.isOpened():
-
                 FRAME_STORE = []
                 for frame_num in range(params.FRAME_COUNT):
                     # Read Feed
@@ -127,6 +131,7 @@ def prediction(params, model, letters):
                     quit()
 
                 time.sleep(2.0)
+
 
 def main():
 
