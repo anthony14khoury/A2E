@@ -11,8 +11,8 @@ from tensorflow.keras.utils import CustomObjectScope
 import socket
 
 # socket settings
-HOST = "127.0.0.1" # The server's hostname or IP address
-PORT = 65432 # The port used by the server
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 65432  # The port used by the server
 
 # Configurations to Install Leap
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -21,55 +21,55 @@ sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
 
-model = load_model('current.h5')# #getting the labels form data directory
+model = load_model('current.h5')  # #getting the labels form data directory
 # labels = sorted(os.listdir("DataCollection"))
 labels = ['a', 'b', 'c', 'nothing']
 
+
 def SampleListener(controller, params):
-     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-         s.connect((HOST, PORT))
-         while True:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
+        while True:
 
-              params.frame_store = []
+            params.frame_store = []
 
-              for count in range(30):  # Looping through number of sequences
+            for count in range(30):  # Looping through number of sequences
 
-                   frame = controller.frame()  # Get frame object
-                   if frame.is_valid:
+                frame = controller.frame()  # Get frame object
+                if frame.is_valid:
+                    params.frame_store = hand_tracking(frame, params.frame_store, count, params, False)
+                    print(params.frame_store[count][0])
+                time.sleep(0.1)
 
-                        params.frame_store = hand_tracking(frame, params.frame_store, count, params, False)
-                        print(params.frame_store[count][0])
-                   time.sleep(0.1)
-
-              # predict
-              # input = np.array(frame_store)
-              prediction = model.predict(np.expand_dims(params.frame_store,axis=0))
-              print(prediction)
-              char_index = np.argmax(prediction)
-              confidence = round(prediction[0,char_index]*100, 1)
-              predicted_char = labels[char_index]
-              s.send(prediction)
-              s.receive(1024)
-              print("PREDICTION:",predicted_char, confidence)
+            # predict
+            # input = np.array(frame_store)
+            prediction = model.predict(np.expand_dims(params.frame_store, axis=0))
+            print(prediction)
+            char_index = np.argmax(prediction)
+            confidence = round(prediction[0, char_index] * 100, 1)
+            predicted_char = labels[char_index]
+            s.send(prediction)
+            s.receive(1024)
+            print("PREDICTION:", predicted_char, confidence)
 
 
 def main():
-    
-     # Class Instantiation
-     params = Params()
-     
-     # Create a controller
-     controller = Leap.Controller()
+    # Class Instantiation
+    params = Params()
 
-     print("Waiting for controller to connect")
-     while not controller.is_connected:
-          pass
-     
-     print ("Controller is connected")
-     time.sleep(2)
+    # Create a controller
+    controller = Leap.Controller()
 
-     # Keep this process running until Enter is pressed
-     SampleListener(controller, params)
+    print("Waiting for controller to connect")
+    while not controller.is_connected:
+        pass
+
+    print("Controller is connected")
+    time.sleep(2)
+
+    # Keep this process running until Enter is pressed
+    SampleListener(controller, params)
+
 
 if __name__ == "__main__":
     main()
