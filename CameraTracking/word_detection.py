@@ -12,7 +12,7 @@ nltk.download('averaged_perceptron_tagger')
 
 from wordfreq import word_frequency
 
-tags_df = pd.read_pickle("posdf.pkl")
+tags_df = pd.read_pickle("posdf.pkl")       #dataframe of probabilities for neighboring parts of speech
 
 def split_text(text, cache = []):
     if not text:
