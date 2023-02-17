@@ -7,6 +7,8 @@ import time
 import mediapipe as mp
 from parameters import Params
 
+from word_detection import add_spaces
+
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -59,6 +61,8 @@ def prediction(params, model, letters):
           cap = cv2.VideoCapture(0, cv2.CAP_ANY)
           print("\nCamera is connected and Everything is Configured!")
           print("Beginning Predictions:\n")
+
+          curr_text = ""
           
           while cap.isOpened():
                
@@ -86,12 +90,16 @@ def prediction(params, model, letters):
                          quit()
                     
 
+
                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
                char_index = np.argmax(prediction)
                confidence = round(prediction[0,char_index]*100, 1)
                predicted_char = letters[char_index]
                # print(prediction)
                print(predicted_char, confidence)
+
+               curr_text += predicted_char
+               print(add_spaces(curr_text))         #Print out most likely placement of spaces, add dashes if none found
           
                # print("New Collection:")
                print("Wait 2 seconds \n")
@@ -109,6 +117,8 @@ def main():
 
      # Keep this process running until Enter is pressed
      prediction(params, model, letters)
+
+
 
 if __name__ == "__main__":
     main()

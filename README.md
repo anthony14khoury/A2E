@@ -26,13 +26,15 @@
     - Leap Image Model & Leap Tracking Models contain code, data, and models for using the LEAP controller
 
 ## Dependencies to Install
-- Python 3
+- Python 3.7
     - cv2
     - numpy
     - matplotlib
     - mediapipe
     - keras
     - sklearn
+    - PyEnchant
+    - wordfreq
 
 
 ## Important Files in Camera Tracking
