@@ -35,6 +35,7 @@
     - sklearn
     - PyEnchant
     - wordfreq
+    - pandas
 
 
 ## Important Files in Camera Tracking
