@@ -4,15 +4,18 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, TensorBoard
+from parameters import Params
+import datetime
 import matplotlib.pyplot as plt
 
-def gathering_data(letters, samples_length, label_map):
+def gathering_data(letters, label_map):
     sequences, labels = [], []
     
     for letter in letters:
+        dir_length = len(os.listdir(os.path.join("DataCollection", letter)))
         
-        for i in range(0, samples_length):
+        for i in range(0, dir_length):
 
             # Grab all 30 frames and append them to window
             res = np.load(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
@@ -41,8 +44,10 @@ def compute_model(X, y, letters):
 
     print("\t Compiling and Fitting Model")
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5, min_delta=0.001, mode='auto')
-    history = model.fit(X_train, y_train, epochs=100, verbose=1, validation_data=(X_test, y_test))
+    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
     print("Plot Learning Curves")
     plt.plot(history.history['categorical_accuracy'])
@@ -64,36 +69,25 @@ def compute_model(X, y, letters):
     plt.savefig('loss_history.png')
 
     print("Saving Model")
-    model.save('abcefjnothing2.h5')
+    
+    model.save('model3.h5')
+    
+    return history
 
 
 if __name__ == "__main__":
     
-    letters = np.array(['a', 'b', 'c', 'e', 'f', 'g', 'h' 'i', 'j', 'k', 'l', 'n', 'nothing'])
+    params = Params()
+    
+    letters = params.LETTERS
     label_map = {label:letters for letters, label in enumerate(letters)}
-    samples_length = 20
     
     print("\t Gathering data to input into model")
-    sequences, labels = gathering_data(letters, samples_length, label_map)
+    sequences, labels = gathering_data(letters, label_map)
     
     X = np.array(sequences)
     y = to_categorical(labels).astype(int)
     
     print("\t Creating and Saving the ML Model:")
-    compute_model(X, y, letters)
-    
-    
-
-
-
-# epochs = 50
-# num_classes = 3
-
-# for activation in [None, 'sigmoid', 'tanh', 'relu']:
-#     model = Sequential()
-#     model.add(Dense(512, activation=activation, input_shape=(30,398)))
-#     model.add(Dense(num_classes, activation='softmax'))
-#     model.compile(loss='categorical_crossentropy', optimizer='Adam', metrics=['accuracy'])
-#     history = model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_data=(X_test, y_test))
-    
-#     plt.plot(history.history['val_acc'])
+    history = compute_model(X, y, letters)
+  
