@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 class Params():
      def __init__(self):
@@ -8,10 +9,33 @@ class Params():
           self.EMPTY_HAND = [0] * 120
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 20
-          self.COLLECTION_FOLDER = 'Test'
-          # self.LETTERS = np.array(['a', 'b', 'c', 'hello','j', 'n', 'name', 'nothing'])
-          # self.LETTERS = np.array(['a', 'c', 'hello', 'name', 'nothing'])
-          self.LETTERS = np.array(['down', 'nothing', 'side', 'up'])
+          self.COLLECTION_FOLDER = 'DataCollection'
+          self.LETTERS = np.array(['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'l', 'n', 'my', 'name', 'nothing'])
+
+
+def mediapipe_detection(image, model):
+     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Color conversion from BGR -> RGB
+     image.flags.writeable = False                  # Image is no longer writable
+     results = model.process(image)                 # Make Prediction
+     image.flags.writeable = True                   # Image is now writable
+     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Color conversion from RGB -> BGR
+     return image, results
+
+
+
+def extract_keypoints(results):
+     
+     if results.left_hand_landmarks: 
+          left_hand = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
+     else: 
+          left_hand = np.zeros(21*3)
+          
+     if results.right_hand_landmarks: 
+          rignt_hand = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
+     else: 
+          rignt_hand = np.zeros(21*3)
+          
+     return np.concatenate([left_hand, rignt_hand])
 
 
 

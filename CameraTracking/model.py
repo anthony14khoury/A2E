@@ -9,18 +9,19 @@ from parameters import Params
 import datetime
 
 
-def gathering_data(letters, samples_length, label_map):
+def gathering_data(letters, label_map):
     sequences, labels = [], []
     
     for letter in letters:
+        dir_length = len(os.listdir(os.path.join("DataCollection", letter)))
         
-        for i in range(0, samples_length):
+        for i in range(0, dir_length):
 
             # Grab all 30 frames and append them to window
-            res = np.load(os.path.join("Test", letter, letter + str(i) + ".npy"))
+            res = np.load(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
             sequences.append(res)
             labels.append(label_map[letter])
-            print(os.path.join("Test", letter, letter + str(i) + ".npy"))
+            print(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
     
     return sequences, labels
 
@@ -46,10 +47,10 @@ def compute_model(X, y, letters):
     # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-    history = model.fit(X_train, y_train, epochs=30, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
+    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
     print("Saving Model")
-    model.save('test_model1.h5')
+    model.save('model3.h5')
     
     return history
 
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     label_map = {label:letters for letters, label in enumerate(letters)}
     
     print("\t Gathering data to input into model")
-    sequences, labels = gathering_data(letters, params.SEQUENCE_COUNT, label_map)
+    sequences, labels = gathering_data(letters, label_map)
     
     X = np.array(sequences)
     y = to_categorical(labels).astype(int)

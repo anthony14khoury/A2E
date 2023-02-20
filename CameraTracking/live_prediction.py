@@ -5,47 +5,20 @@ import os
 from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
-from parameters import Params
+from parameters import Params, mediapipe_detection, extract_keypoints
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
-def generic_mediapipe_detection(image, model):
-     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Color conversion from BGR -> RGB
-     image.flags.writeable = False                  # Image is no longer writable
-     image.flags.writeable = True                   # Image is now writable
-     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Color conversion from RGB -> BGR
-     return image
 
-def mediapipe_detection(image, model):
-     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Color conversion from BGR -> RGB
-     image.flags.writeable = False                  # Image is no longer writable
-     results = model.process(image)                 # Make Prediction
-     image.flags.writeable = True                   # Image is now writable
-     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Color conversion from RGB -> BGR
-     return image, results
-
-def extract_keypoints(results):
-     
-     if results.left_hand_landmarks: 
-          left_hand = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
-     else: 
-          left_hand = np.zeros(21*3)
-          
-     if results.right_hand_landmarks: 
-          rignt_hand = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
-     else: 
-          rignt_hand = np.zeros(21*3)
-               
-     # if results.pose_landmarks: 
-     #      pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten()
-     #      pose = pose[(11*4)+1 : (23*4)+1] # Only getting the relevant data from pose
-     # else: 
-     #      pose = np.zeros(48)
-          
-     # return np.concatenate([left_hand, rignt_hand, pose])
-     return np.concatenate([left_hand, rignt_hand])
+# constants for prediction script
+getReady = "Prepare to Sign!"
+go = "Go!"
+font = cv2.FONT_HERSHEY_SIMPLEX
+color = (255,0,255)
+fontScale = 2
+thickness = 4
 
 
 def draw_styled_landmarks(image, results):
@@ -60,11 +33,6 @@ def draw_styled_landmarks(image, results):
                               mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4), 
                               mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                               )
-     # Draw Pose Connections
-     # mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
-     #                          mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4), 
-     #                          mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
-     #                          )
 
 def prediction(params, model, letters):
                      
@@ -91,8 +59,10 @@ def prediction(params, model, letters):
                     FRAME_STORE.append(keypoints)
                     
                     # Show to screen
+                    image = cv2.putText(image, go, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                    print(len(image), len(image[0]))
                     cv2.imshow('OpenCV Feed', image)
-                    
+                                        
                     # Breaking gracefully
                     if cv2.waitKey(5) & 0xFF == ord('q'):
                          cap.release()
@@ -104,18 +74,40 @@ def prediction(params, model, letters):
                char_index = np.argmax(prediction)
                confidence = round(prediction[0,char_index]*100, 1)
                predicted_char = letters[char_index]
-               # print(prediction)
                print(predicted_char, confidence)
           
-               # print("New Collection:")
-               print("Wait 2 seconds \n")
-               time.sleep(2.0)
+               
+               timeout = time.time() + 2
+               while True:
+                    
+                    if time.time() > timeout:
+                         break
+     
+                    # Read Feed
+                    ret, frame = cap.read()
+                    
+                    # Made detections
+                    image, results = mediapipe_detection(frame, holistic)
+                    draw_styled_landmarks(image, results)
+                    keypoints = extract_keypoints(results)
+                    FRAME_STORE.append(keypoints)
+                    
+                    # Show to screen
+                    image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                    cv2.imshow('OpenCV Feed', image)
+                    
+                    # Breaking gracefully
+                    if cv2.waitKey(5) & 0xFF == ord('q'):
+                         cap.release()
+                         cv2.destroyAllWindows()
+                         quit()
+                    
 
 
 if __name__ == "__main__":
      
      # Load in the ML Model
-     model = load_model('test_model1.h5')
+     model = load_model('model3.h5')
     
      # Class Instantiation
      params = Params()
