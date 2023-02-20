@@ -40,15 +40,21 @@ def extract_keypoints(results):
      return np.concatenate([lh, rh])
 
 def draw_styled_landmarks(image, results):
+     # Draw Left Hand Connections
      mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
                               mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4), 
                               mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
                               ) 
-     # Draw right hand connections  
+     # Draw Right Hand Connections  
      mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
                               mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4), 
                               mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
-                              ) 
+                              )
+     # # Draw Pose Connections
+     # mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
+     #                          mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4), 
+     #                          mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
+     #                          )
 
 
 def collect_data(params, letter):
@@ -72,9 +78,7 @@ def collect_data(params, letter):
                     
                     FRAME_STORE = []
                     for frame_num in range(params.FRAME_COUNT):
-                         
-                         # print("Frame: {}".format(frame_num))
-                         
+                                                  
                          # Read Feed
                          ret, frame = cap.read()
                          
@@ -86,12 +90,7 @@ def collect_data(params, letter):
                          
                          # Show to screen
                          cv2.imshow('OpenCV Feed', image)
-                                        
-                         # Show to screen
-                         # cv2.imshow('OpenCV Feed', frame)
-                         
-                         # time.sleep(0.033)
-                         
+                                                  
                          # Breaking gracefully
                          if cv2.waitKey(5) & 0xFF == ord('q'):
                               cap.release()
@@ -127,7 +126,7 @@ if __name__ == "__main__":
      
      params = Params()
      
-     letter = 'e'
+     letter = 'n'
      
      # Create Folder
      try:

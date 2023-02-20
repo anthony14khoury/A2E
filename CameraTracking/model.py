@@ -41,7 +41,7 @@ def compute_model(X, y, letters):
 
     print("\t Compiling and Fitting Model")
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, min_delta=0.001, mode='auto')
     history = model.fit(X_train, y_train, epochs=100, verbose=1, validation_data=(X_test, y_test))
 
     print("Plot Learning Curves")
@@ -69,7 +69,7 @@ def compute_model(X, y, letters):
 
 if __name__ == "__main__":
     
-    letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
+    letters = np.array(['a', 'b', 'c', 'e', 'f', 'g', 'h' 'i', 'j', 'k', 'l', 'n', 'nothing'])
     label_map = {label:letters for letters, label in enumerate(letters)}
     samples_length = 20
     
