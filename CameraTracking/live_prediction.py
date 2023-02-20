@@ -102,13 +102,15 @@ def prediction(params, model, letters):
 
 
                if len(predicted_char) > 1:
-                   curr_sen.append(predicted_char)
-                   curr_letters = ""
-                   curr_sen = np.concatenate(curr_sen,temp)
-                   temp = []
+                 #ipdb.set_trace()
+                 curr_sen = np.concatenate((curr_sen,temp))
+                 curr_letters = ""
+                 curr_sen = np.append(curr_sen,predicted_char)
+                 temp = []
                else:
-                   curr_letters += predicted_char
-               temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
+                 curr_letters += predicted_char
+               answer,temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
+               print(answer)
           
                # print("New Collection:")
                print("Wait 2 seconds \n")

@@ -30,7 +30,7 @@ def split_text(text, cache = []):
              else:
                  curr_pos = nltk.pos_tag([word])
                  #ipdb.set_trace(context=6)
-                 p = tags_df.loc[cache[-1][1]],[curr_pos[0][1]]
+                 p = tags_df.loc[cache[-1][1],curr_pos[0][1]]
              p = p*f
              if remainder != "":
                  remainder_p, remainder = split_text(remainder, cache + curr_pos)
@@ -47,18 +47,24 @@ def split_text(text, cache = []):
 
 
 def add_spaces(text, cache = []):
-    if cache != []:
+    temp = []
+    #ipdb.set_trace();
+    if len(cache) != 0:
         cache = nltk.pos_tag(cache)
     words = split_text(text, cache)
+    #ipdb.set_trace();
     answer = ""
-    temp = []
     #ipdb.set_trace(context=6)
     if words[0] < 1e-40:
         answer = "-".join(text)
         temp.append(answer)
     else:
         for i in words[1]:
-            answer = answer + i[0] + " "
             temp.append(i[0])
-        answer = answer[:-1]
+    answer = ""
+    for i in cache:
+        answer = answer + i[0] + " "
+    for i in temp:
+        answer = answer + i + " "
+    answer = answer[:-1]
     return answer, temp
