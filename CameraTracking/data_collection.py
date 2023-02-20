@@ -27,19 +27,27 @@ def mediapipe_detection(image, model):
 
 def extract_keypoints(results):
      
-     if results.left_hand_landmarks:
-          lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
-     else:
-          lh = np.zeros(21*3)
+     if results.left_hand_landmarks: 
+          left_hand = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
+     else: 
+          left_hand = np.zeros(21*3)
           
-     if results.right_hand_landmarks:
-          rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
-     else:
-          rh = np.zeros(21*3)
+     if results.right_hand_landmarks: 
+          rignt_hand = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
+     else: 
+          rignt_hand = np.zeros(21*3)
+               
+     # if results.pose_landmarks: 
+     #      pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten()
+     #      pose = pose[(11*4)+1 : (23*4)+1] # Only getting the relevant data from pose
+     # else: 
+     #      pose = np.zeros(48)
      
-     return np.concatenate([lh, rh])
+     return np.concatenate([left_hand, rignt_hand])
+     # return np.concatenate([left_hand, rignt_hand, pose])
 
 def draw_styled_landmarks(image, results):
+     
      # Draw Left Hand Connections
      mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
                               mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4), 
@@ -86,7 +94,7 @@ def collect_data(params, letter):
                          image, results = mediapipe_detection(frame, holistic)
                          draw_styled_landmarks(image, results)
                          keypoints = extract_keypoints(results)
-                         FRAME_STORE.append(keypoints)           
+                         FRAME_STORE.append(keypoints)     
                          
                          # Show to screen
                          cv2.imshow('OpenCV Feed', image)
@@ -108,7 +116,7 @@ def collect_data(params, letter):
                
                
                # Writing npy files
-               target_folder = os.path.join(os.path.join('DataCollection'), letter)
+               target_folder = os.path.join(os.path.join('Test'), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
                     np.save(target_folder + "/" + letter + str(i), set_of_frames)
@@ -126,7 +134,7 @@ if __name__ == "__main__":
      
      params = Params()
      
-     letter = 'n'
+     letter = 'down'
      
      # Create Folder
      try:

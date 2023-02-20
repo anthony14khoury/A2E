@@ -28,35 +28,51 @@ def mediapipe_detection(image, model):
 
 def extract_keypoints(results):
      
-     if results.left_hand_landmarks:
-          lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
-     else:
-          lh = np.zeros(21*3)
+     if results.left_hand_landmarks: 
+          left_hand = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()
+     else: 
+          left_hand = np.zeros(21*3)
           
-     if results.right_hand_landmarks:
-          rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
-     else:
-          rh = np.zeros(21*3)
-     
-     return np.concatenate([lh, rh])
+     if results.right_hand_landmarks: 
+          rignt_hand = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten()
+     else: 
+          rignt_hand = np.zeros(21*3)
+               
+     # if results.pose_landmarks: 
+     #      pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten()
+     #      pose = pose[(11*4)+1 : (23*4)+1] # Only getting the relevant data from pose
+     # else: 
+     #      pose = np.zeros(48)
+          
+     # return np.concatenate([left_hand, rignt_hand, pose])
+     return np.concatenate([left_hand, rignt_hand])
+
 
 def draw_styled_landmarks(image, results):
+     
+     # Draw Left Hand Connections
      mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
                               mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4), 
                               mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
                               ) 
-     # Draw right hand connections  
+     # Draw Right Hand Connections  
      mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
                               mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4), 
                               mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
-                              ) 
+                              )
+     # Draw Pose Connections
+     # mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
+     #                          mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4), 
+     #                          mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
+     #                          )
 
 def prediction(params, model, letters):
                      
      # Set mediapipe model
      with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
           
-          cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+          # cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+          cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
           print("\nCamera is connected and Everything is Configured!")
           print("Beginning Predictions:\n")
           
@@ -64,9 +80,7 @@ def prediction(params, model, letters):
                
                FRAME_STORE = []
                for frame_num in range(params.FRAME_COUNT):
-                    
-                    # print("Frame: {}".format(frame_num))
-                    
+                                        
                     # Read Feed
                     ret, frame = cap.read()
                     
@@ -96,19 +110,15 @@ def prediction(params, model, letters):
                # print("New Collection:")
                print("Wait 2 seconds \n")
                time.sleep(2.0)
-          
 
 
-def main():
+if __name__ == "__main__":
      
-     model = load_model('abcefjnothing2.h5')
-     letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
+     # Load in the ML Model
+     model = load_model('test_model1.h5')
     
      # Class Instantiation
      params = Params()
 
      # Keep this process running until Enter is pressed
-     prediction(params, model, letters)
-
-if __name__ == "__main__":
-    main()
+     prediction(params, model, params.LETTERS)
