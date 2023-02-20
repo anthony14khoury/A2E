@@ -46,14 +46,19 @@ def split_text(text, cache = []):
     return cache
 
 
-def add_spaces(text):
-    words = split_text(text)
+def add_spaces(text, cache = []):
+    if cache != []:
+        cache = nltk.pos_tag(cache)
+    words = split_text(text, cache)
     answer = ""
+    temp = []
     #ipdb.set_trace(context=6)
     if words[0] < 1e-40:
         answer = "-".join(text)
+        temp.append(answer)
     else:
         for i in words[1]:
             answer = answer + i[0] + " "
+            temp.append(i[0])
         answer = answer[:-1]
-    return answer
+    return answer, temp

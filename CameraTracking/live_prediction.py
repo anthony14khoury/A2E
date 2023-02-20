@@ -62,7 +62,9 @@ def prediction(params, model, letters):
           print("\nCamera is connected and Everything is Configured!")
           print("Beginning Predictions:\n")
 
-          curr_text = ""
+          curr_sen = []
+          curr_letters = ""
+          temp  = []
           
           while cap.isOpened():
                
@@ -98,8 +100,15 @@ def prediction(params, model, letters):
                # print(prediction)
                print(predicted_char, confidence)
 
-               curr_text += predicted_char
-               print(add_spaces(curr_text))         #Print out most likely placement of spaces, add dashes if none found
+
+               if len(predicted_char) > 1:
+                   curr_sen.append(predicted_char)
+                   curr_letters = ""
+                   curr_sen = np.concatenate(curr_sen,temp)
+                   temp = []
+               else:
+                   curr_letters += predicted_char
+               temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
           
                # print("New Collection:")
                print("Wait 2 seconds \n")
