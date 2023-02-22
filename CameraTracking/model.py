@@ -52,9 +52,10 @@ def compute_model(X, y, letters):
 
     print("\t Compiling and Fitting Model")
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-    history = model.fit(X_train, y_train, epochs=120, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
+    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
     # print("Plot Learning Curves")
     # plt.plot(history.history['categorical_accuracy'])
@@ -77,7 +78,7 @@ def compute_model(X, y, letters):
 
     print("Saving Model")
     
-    model.save('bigmodel1.h5')
+    model.save('model3.h5')
     
     return history
 

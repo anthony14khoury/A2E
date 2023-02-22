@@ -91,7 +91,7 @@ if __name__ == "__main__":
      
      params = Params()
      
-     letter = 'e'
+     letter = 'i'
      
      # Create Folder
      try:
