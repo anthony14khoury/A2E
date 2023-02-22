@@ -19,9 +19,10 @@ while not cap.isOpened():
 print("Camera is connected")
 
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
-model = load_model('abcefjnothing2.h5')
+model = load_model('abcnothing2.h5')
 params = Params()
+# letters = params.LETTERS
+letters = np.array(['a', 'b', 'c', 'nothing'])
 
 def extract_keypoints(results):
     lh = np.zeros(21*3)
@@ -38,12 +39,14 @@ def extract_keypoints(results):
     return np.concatenate([lh, rh])
 
 
-with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,
-                       max_num_hands=2) as hands:
+with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
+    
     # Create an infinite loop which will produce the live feed to our desktop and that will search for hands
     while True:
+        
         FRAME_STORE = []
         for frame_num in range(params.FRAME_COUNT):
+            
             ret, frame = cap.read()
             start = time.time()
             # Unedit the below line if your live feed is produced upsidedown
