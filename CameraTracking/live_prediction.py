@@ -86,6 +86,10 @@ def prediction(params, model, letters):
 
             print("\nCamera is connected and Everything is Configured!")
 
+            curr_sen = []
+            temp = []
+            curr_letters = ""
+
             print("Beginning Predictions:\n")
             while cap.isOpened():
                 FRAME_STORE = []
@@ -129,6 +133,8 @@ def prediction(params, model, letters):
                 print(predicted_char, confidence)
                
                 timeout = time.time() + 2
+                
+
                 while True:
                         
                     if time.time() > timeout:
@@ -153,12 +159,7 @@ def prediction(params, model, letters):
                          cv2.destroyAllWindows()
                          quit()
                     
-                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
-                char_index = np.argmax(prediction)
-                confidence = round(prediction[0,char_index]*100, 1)
-                predicted_char = letters[char_index]
-                # s.send(predicted_char)
-               
+
                 if len(predicted_char) > 1:
                   #ipdb.set_trace()
                   curr_sen = np.concatenate((curr_sen,temp))
@@ -170,11 +171,6 @@ def prediction(params, model, letters):
                 answer,temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
                 print(answer)
           
-                # print("New Collection:")
-                print("Wait 2 seconds \n")
-                time.sleep(2.0)
-          
-
                 print("Wait 2 seconds \n")
                
                 #image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
