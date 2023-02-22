@@ -8,6 +8,8 @@ import mediapipe as mp
 from parameters import Params, mediapipe_detection, extract_keypoints
 import socket
 
+from word_detection import add_spaces
+
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -125,7 +127,6 @@ def prediction(params, model, letters):
                 confidence = round(prediction[0,char_index]*100, 1)
                 predicted_char = letters[char_index]
                 print(predicted_char, confidence)
-          
                
                 timeout = time.time() + 2
                 while True:
@@ -156,10 +157,23 @@ def prediction(params, model, letters):
                 char_index = np.argmax(prediction)
                 confidence = round(prediction[0,char_index]*100, 1)
                 predicted_char = letters[char_index]
-               # s.send(predicted_char)
-
-                # print prediction
-                print(predicted_char, confidence)
+                # s.send(predicted_char)
+               
+                if len(predicted_char) > 1:
+                  #ipdb.set_trace()
+                  curr_sen = np.concatenate((curr_sen,temp))
+                  curr_letters = ""
+                  curr_sen = np.append(curr_sen,predicted_char)
+                  temp = []
+                else:
+                  curr_letters += predicted_char
+                answer,temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
+                print(answer)
+          
+                # print("New Collection:")
+                print("Wait 2 seconds \n")
+                time.sleep(2.0)
+          
 
                 print("Wait 2 seconds \n")
                
@@ -181,6 +195,6 @@ if __name__ == "__main__":
 
     # Class Instantiation
     params = Params()
-
+    
     # Keep this process running until Enter is pressed
     prediction(params, model, params.LETTERS)
