@@ -41,36 +41,43 @@ def compute_model(X, y, letters):
     model.add(Dense(64, activation=activation))
     model.add(Dense(32, activation=activation))
     model.add(Dense(letters.shape[0], activation='softmax'))
+    
+    earlystop_callback = EarlyStopping(
+        monitor='categorical_accuracy', # monitor validation loss
+        min_delta=0.001, # minimum change in the monitored quantity to qualify as an improvement
+        patience=12, # number of epochs with no improvement after which training will be stopped
+        verbose=1, # print message when training stops
+        restore_best_weights=True # restore the weights of the best iteration when stopping training
+    )
 
     print("\t Compiling and Fitting Model")
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
+    history = model.fit(X_train, y_train, epochs=120, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
-    print("Plot Learning Curves")
-    plt.plot(history.history['categorical_accuracy'])
-    plt.plot(history.history['val_categorical_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('accuracy_history.png')
+    # print("Plot Learning Curves")
+    # plt.plot(history.history['categorical_accuracy'])
+    # plt.plot(history.history['val_categorical_accuracy'])
+    # plt.title('model accuracy')
+    # plt.ylabel('accuracy')
+    # plt.xlabel('epoch')
+    # plt.legend(['train', 'test'], loc='upper left')
+    # plt.savefig('accuracy_history.png')
 
-    # summarize history for loss
-    plt.clf()
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('loss_history.png')
+    # # summarize history for loss
+    # plt.clf()
+    # plt.plot(history.history['loss'])
+    # plt.plot(history.history['val_loss'])
+    # plt.title('model loss')
+    # plt.ylabel('loss')
+    # plt.xlabel('epoch')
+    # plt.legend(['train', 'test'], loc='upper left')
+    # plt.savefig('loss_history.png')
 
     print("Saving Model")
     
-    model.save('model3.h5')
+    model.save('bigmodel1.h5')
     
     return history
 

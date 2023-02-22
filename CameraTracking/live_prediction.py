@@ -39,8 +39,8 @@ def prediction(params, model, letters):
      # Set mediapipe model
      with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
           
-          # cap = cv2.VideoCapture(0, cv2.CAP_ANY)
-          cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+          cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+          # cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
           print("\nCamera is connected and Everything is Configured!")
           print("Beginning Predictions:\n")
           
@@ -60,7 +60,6 @@ def prediction(params, model, letters):
                     
                     # Show to screen
                     image = cv2.putText(image, go, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                    print(len(image), len(image[0]))
                     cv2.imshow('OpenCV Feed', image)
                                         
                     # Breaking gracefully
@@ -76,7 +75,7 @@ def prediction(params, model, letters):
                predicted_char = letters[char_index]
                print(predicted_char, confidence)
           
-               
+               # time.sleep(2.0)
                timeout = time.time() + 2
                while True:
                     
@@ -103,11 +102,10 @@ def prediction(params, model, letters):
                          quit()
                     
 
-
 if __name__ == "__main__":
      
      # Load in the ML Model
-     model = load_model('model3.h5')
+     model = load_model('bigmodel1.h5')
     
      # Class Instantiation
      params = Params()
