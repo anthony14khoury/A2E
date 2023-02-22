@@ -7,7 +7,7 @@ drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
 #Use CV2 Functionality to create a Video stream and add some values
-cap = cv2.VideoCapture('/dev/video0', cv2.CAP_ANY)
+cap = cv2.VideoCapture(1, cv2.CAP_ANY)
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
@@ -20,7 +20,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
         ret, frame = cap.read()
         #Unedit the below line if your live feed is produced upsidedown
         #flipped = cv2.flip(frame, flipCode = -1)
-
+        frame = cv2.resize(frame, (640,480))
         #Determines the frame size, 640 x 480 offers a nice balance between speed and accurate identification
 
         #Produces the hand framework overlay ontop of the hand, you can choose the colour here too)
