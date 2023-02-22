@@ -118,19 +118,19 @@ def prediction(params, model, letters):
 
                     print(time.time()-start)
 
-               prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
-               char_index = np.argmax(prediction)
-               confidence = round(prediction[0,char_index]*100, 1)
-               predicted_char = letters[char_index]
-               print(predicted_char, confidence)
+                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
+                char_index = np.argmax(prediction)
+                confidence = round(prediction[0,char_index]*100, 1)
+                predicted_char = letters[char_index]
+                print(predicted_char, confidence)
           
                
-               timeout = time.time() + 2
-               while True:
-                    
+                timeout = time.time() + 2
+                while True:
+                        
                     if time.time() > timeout:
-                         break
-     
+                        break
+    
                     # Read Feed
                     ret, frame = cap.read()
                     
