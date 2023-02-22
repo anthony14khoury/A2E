@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 from parameters import Params, mediapipe_detection, extract_keypoints
+import socket
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -20,7 +21,6 @@ color = (255,0,255)
 fontScale = 2
 thickness = 4
 
-<<<<<<< HEAD
 # socket settings
 HOST = "10.136.49.55" # The server's hostname or IP address
 PORT =4000 # The port used by the server
@@ -53,8 +53,6 @@ def extract_keypoints(results):
         rh = np.zeros(21*3)
 
     return np.concatenate([lh, rh])
-=======
->>>>>>> fb0cf833e7b147e2f16f5a4ba250552122993ed6
 
 def draw_styled_landmarks(image, results):
      
@@ -70,7 +68,6 @@ def draw_styled_landmarks(image, results):
                               )
 
 def prediction(params, model, letters):
-<<<<<<< HEAD
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # connect to socket
@@ -93,23 +90,6 @@ def prediction(params, model, letters):
                 for frame_num in range(params.FRAME_COUNT):
                     start = time.time()
 		    # Read Feed
-=======
-                     
-     # Set mediapipe model
-     with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-          
-          # cap = cv2.VideoCapture(0, cv2.CAP_ANY)
-          cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-          print("\nCamera is connected and Everything is Configured!")
-          print("Beginning Predictions:\n")
-          
-          while cap.isOpened():
-               
-               FRAME_STORE = []
-               for frame_num in range(params.FRAME_COUNT):
-                                        
-                    # Read Feed
->>>>>>> fb0cf833e7b147e2f16f5a4ba250552122993ed6
                     ret, frame = cap.read()
                     
                     # Made detections
@@ -117,7 +97,6 @@ def prediction(params, model, letters):
                    # draw_styled_landmarks(image, results)
                     keypoints = extract_keypoints(results)
                     FRAME_STORE.append(keypoints)
-<<<<<<< HEAD
 
                     # Show to screen with go message
                     if frame_num < 10:
@@ -139,34 +118,20 @@ def prediction(params, model, letters):
                         quit()
                     end = time.time()
                     print(end-start)
-=======
-                    
-                    # Show to screen
-                    image = cv2.putText(image, go, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                    print(len(image), len(image[0]))
-                    cv2.imshow('OpenCV Feed', image)
-                                        
-                    # Breaking gracefully
-                    if cv2.waitKey(5) & 0xFF == ord('q'):
-                         cap.release()
-                         cv2.destroyAllWindows()
-                         quit()
-                    
->>>>>>> fb0cf833e7b147e2f16f5a4ba250552122993ed6
 
-               prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
-               char_index = np.argmax(prediction)
-               confidence = round(prediction[0,char_index]*100, 1)
-               predicted_char = letters[char_index]
-               print(predicted_char, confidence)
+                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
+                char_index = np.argmax(prediction)
+                confidence = round(prediction[0,char_index]*100, 1)
+                predicted_char = letters[char_index]
+                print(predicted_char, confidence)
           
                
-               timeout = time.time() + 2
-               while True:
-                    
+                timeout = time.time() + 2
+                while True:
+                        
                     if time.time() > timeout:
-                         break
-     
+                        break
+    
                     # Read Feed
                     ret, frame = cap.read()
                     
@@ -182,47 +147,10 @@ def prediction(params, model, letters):
                     
                     # Breaking gracefully
                     if cv2.waitKey(5) & 0xFF == ord('q'):
-                         cap.release()
-                         cv2.destroyAllWindows()
-                         quit()
-                    
-
-<<<<<<< HEAD
-                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
-                char_index = np.argmax(prediction)
-                confidence = round(prediction[0,char_index]*100, 1)
-                predicted_char = letters[char_index]
-#                s.send(predicted_char)
-
-                # print prediction
-                print(predicted_char, confidence)
-
-                print("Wait 2 seconds \n")
-
-               # image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                #cv2.imshow('OpenCV Feed', image)
-                # Breaking gracefully
-                if cv2.waitKey(5) & 0xFF == ord('q'):
-                    cap.release()
-                    cv2.destroyAllWindows()
-                    quit()
-
-                time.sleep(2.0)
-
-
-def main():
-    model = load_model('abcefjnothing2.h5')
-    letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
-
-    # Class Instantiation
-    params = Params()
-
-    # Keep this process running until Enter is pressed
-    prediction(params, model, letters)
-
-if __name__ == "__main__":
-    main()
-=======
+                        cap.release()
+                        cv2.destroyAllWindows()
+                        quit()
+                        
 
 if __name__ == "__main__":
      
@@ -234,4 +162,3 @@ if __name__ == "__main__":
 
      # Keep this process running until Enter is pressed
      prediction(params, model, params.LETTERS)
->>>>>>> fb0cf833e7b147e2f16f5a4ba250552122993ed6
