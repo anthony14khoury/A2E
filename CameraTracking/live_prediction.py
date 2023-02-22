@@ -85,33 +85,33 @@ def prediction(params, model, letters):
                 for frame_num in range(params.FRAME_COUNT):
                     # Read Feed
                     ret, frame = cap.read()
-
+                    start = time.time()
                     # Made detections
                     image, results = mediapipe_detection(frame, holistic)
-                    draw_styled_landmarks(image, results)
+                    #draw_styled_landmarks(image, results)
                     keypoints = extract_keypoints(results)
                     FRAME_STORE.append(keypoints)
 
                     # Show to screen with go message
-                    if frame_num < 10:
-                        image = cv2.putText(image, go, (int(len(image[0])/2)-10, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                        cv2.imshow('OpenCV Feed', image)
+                    #if frame_num < 10:
+                     #   image = cv2.putText(image, go, (int(len(image[0])/2)-10, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                     #   cv2.imshow('OpenCV Feed', image)
                         # Breaking gracefully
-                        if cv2.waitKey(5) & 0xFF == ord('q'):
-                            cap.release()
-                            cv2.destroyAllWindows()
-                            quit()
+                      #  if cv2.waitKey(5) & 0xFF == ord('q'):
+                       #     cap.release()
+                        #    cv2.destroyAllWindows()
+                         #   quit()
 
                     # Just Show to screen
-                    cv2.imshow('OpenCV Feed', image)
+                    #cv2.imshow('OpenCV Feed', image)
 
                     # Breaking gracefully
-                    if cv2.waitKey(5) & 0xFF == ord('q'):
-                        cap.release()
-                        cv2.destroyAllWindows()
-                        quit()
+                    #if cv2.waitKey(5) & 0xFF == ord('q'):
+                     #   cap.release()
+                      #  cv2.destroyAllWindows()
+                       # quit()
 
-
+                    print(time.time()-start)
                 prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
                 char_index = np.argmax(prediction)
                 confidence = round(prediction[0,char_index]*100, 1)
@@ -122,14 +122,14 @@ def prediction(params, model, letters):
                 print(predicted_char, confidence)
 
                 print("Wait 2 seconds \n")
-
-                image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                cv2.imshow('OpenCV Feed', image)
+               
+                #image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                #cv2.imshow('OpenCV Feed', image)
                 # Breaking gracefully
-                if cv2.waitKey(5) & 0xFF == ord('q'):
-                    cap.release()
-                    cv2.destroyAllWindows()
-                    quit()
+                #if cv2.waitKey(5) & 0xFF == ord('q'):
+                 #   cap.release()
+                  #  cv2.destroyAllWindows()
+                   # quit()
 
                 time.sleep(2.0)
 

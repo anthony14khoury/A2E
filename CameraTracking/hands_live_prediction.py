@@ -45,6 +45,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
         FRAME_STORE = []
         for frame_num in range(params.FRAME_COUNT):
             ret, frame = cap.read()
+            start = time.time()
             # Unedit the below line if your live feed is produced upsidedown
             # flipped = cv2.flip(frame, flipCode = -1)
             frame = cv2.resize(frame, (640, 480))
@@ -58,13 +59,13 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
             FRAME_STORE.append(keypoints)
 
             # draw landmarks
-            if results.multi_hand_landmarks != None:
-                for handLandmarks in results.multi_hand_landmarks:
-                    drawingModule.draw_landmarks(frame, handLandmarks, handsModule.HAND_CONNECTIONS)
-
+            #if results.multi_hand_landmarks != None:
+             #   for handLandmarks in results.multi_hand_landmarks:
+              #      drawingModule.draw_landmarks(frame, handLandmarks, handsModule.HAND_CONNECTIONS)
+            print(time.time()-start)
             # Below shows the current frame to the desktop
-            cv2.imshow("Frame", frame)
-            key = cv2.waitKey(1) & 0xFF
+            #cv2.imshow("Frame", frame)
+            #key = cv2.waitKey(1) & 0xFF
             # Below states that if the |q| is press on the keyboard it will stop the system
 
         prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
