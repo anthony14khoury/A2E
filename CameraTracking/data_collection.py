@@ -29,7 +29,7 @@ def collect_data(params, letter):
      # Set mediapipe model
      with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
           
-          cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+          cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
           print("Camera is connected and Everything is Configured!")
           
           
@@ -78,14 +78,13 @@ def collect_data(params, letter):
                target_folder = os.path.join(os.path.join(params.COLLECTION_FOLDER), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+40), set_of_frames)
                     
                
                print("\n Program is Finished \n")
                cap.release()
                cv2.destroyAllWindows()
                quit()
-     
      
      
 if __name__ == "__main__":

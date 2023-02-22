@@ -176,11 +176,11 @@ def prediction(params, model, letters):
 
 if __name__ == "__main__":
      
-     # Load in the ML Model
-     model = load_model('model3.h5')
-    
-     # Class Instantiation
-     params = Params()
+    # Load in the ML Model
+    model = load_model('model3.h5')
 
-     # Keep this process running until Enter is pressed
-     prediction(params, model, params.LETTERS)
+    # Class Instantiation
+    params = Params()
+
+    # Keep this process running until Enter is pressed
+    prediction(params, model, params.LETTERS)

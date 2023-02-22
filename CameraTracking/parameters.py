@@ -10,7 +10,8 @@ class Params():
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 20
           self.COLLECTION_FOLDER = 'DataCollection'
-          self.LETTERS = np.array(['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'l', 'n', 'my', 'name', 'nothing'])
+          self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 'my', 'name', 'nothing'])
+          # self.LETTERS = np.array(['a', 'e', 's', 'nothing'])
 
 
 def mediapipe_detection(image, model):
