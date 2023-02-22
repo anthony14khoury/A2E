@@ -13,7 +13,7 @@ drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
 # Use CV2 Functionality to create a Video stream and add some values
-cap = cv2.VideoCapture(1, cv2.CAP_ANY)
+cap = cv2.VideoCapture(0, cv2.CAP_ANY)
 
 num_of_reader_procs = 4
 
@@ -104,14 +104,17 @@ def start_reader_procs(qq, FRAME_STORE,DRAWING_STORE, num_of_reader_procs):
 
 
 if __name__ == '__main__':
-    qq = multiprocessing.Queue()
-    FRAME_STORE = multiprocessing.Queue()
-    DRAWING_STORE = multiprocessing.Queue()
+    qq = multiprocessing.Queue() # cv2 frames
+    FRAME_STORE = multiprocessing.Queue() # keypoints
+    DRAWING_STORE = multiprocessing.Queue() # final image
 
+    # handle generating keypoints and final image
     all_reader_procs = start_reader_procs(qq, FRAME_STORE,DRAWING_STORE, num_of_reader_procs)
 
+    # gets raw frame from cv2
     producer_process = multiprocessing.Process(target=predictor, args=((qq),))
 
+    # gets keypoints and final image and makes prediction and outputs image
     output_process = multiprocessing.Process(target=output, args=(FRAME_STORE, DRAWING_STORE))
 
     for idx, a_reader_proc in enumerate(all_reader_procs):
