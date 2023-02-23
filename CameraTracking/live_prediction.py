@@ -71,21 +71,22 @@ def draw_styled_landmarks(image, results):
 
 def prediction(params, model, letters):
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # connect to socket
         #s.connect((HOST, PORT))
 
         # Set mediapipe model
-        with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    with mp_holistic.Holistic(model_complexity = 1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
 
-            cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+        cap = cv2.VideoCapture(0, cv2.CAP_ANY)
 
-            # Wait until camera is connected
-            while not cap.isOpened():
-                pass
+        # Wait until camera is connected
+        while not cap.isOpened():
+            pass
 
-            print("\nCamera is connected and Everything is Configured!")
+        print("\nCamera is connected and Everything is Configured!")
 
+<<<<<<< HEAD
             curr_sen = []
             temp = []
             curr_letters = ""
@@ -97,34 +98,35 @@ def prediction(params, model, letters):
                     start = time.time()
 		            
                     # Read Feed         
+=======
+        print("Beginning Predictions:\n")
+        while cap.isOpened():
+            FRAME_STORE = []
+            for frame_num in range(params.FRAME_COUNT):
+                # start = time.time()
+                
+                # Read Feed         
+>>>>>>> 4efc031b030466d87f01de790a5f42601fc137c9
 
-                    ret, frame = cap.read()
-                    start = time.time()
-                    # Made detections
-                    image, results = mediapipe_detection(frame, holistic)
-                    #draw_styled_landmarks(image, results)
-                    keypoints = extract_keypoints(results)
-                    FRAME_STORE.append(keypoints)
+                ret, frame = cap.read()
+                # start = time.time()
+                # Made detections
+                image, results = mediapipe_detection(frame, holistic)
+                draw_styled_landmarks(image, results)
+                keypoints = extract_keypoints(results)
+                FRAME_STORE.append(keypoints)
 
-                    #if frame_num < 10:
-                     #   image = cv2.putText(image, go, (int(len(image[0])/2)-10, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-                     #   cv2.imshow('OpenCV Feed', image)
-                        # Breaking gracefully
-                      #  if cv2.waitKey(5) & 0xFF == ord('q'):
-                       #     cap.release()
-                        #    cv2.destroyAllWindows()
-                         #   quit()
-
-                    # Just Show to screen
-                    #cv2.imshow('OpenCV Feed', image)
-
+                #if frame_num < 10:
+                    #   image = cv2.putText(image, go, (int(len(image[0])/2)-10, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                    #   cv2.imshow('OpenCV Feed', image)
                     # Breaking gracefully
-                    #if cv2.waitKey(5) & 0xFF == ord('q'):
-                     #   cap.release()
-                      #  cv2.destroyAllWindows()
-                       # quit()
+                    #  if cv2.waitKey(5) & 0xFF == ord('q'):
+                    #     cap.release()
+                    #    cv2.destroyAllWindows()
+                        #   quit()
 
-                    print(time.time()-start)
+                # Just Show to screen
+                cv2.imshow('OpenCV Feed', image)
 
                 prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
                 char_index = np.argmax(prediction)
@@ -177,17 +179,72 @@ def prediction(params, model, letters):
 
                 #cv2.imshow('OpenCV Feed', image)
                 # Breaking gracefully
-                #if cv2.waitKey(5) & 0xFF == ord('q'):
-                 #   cap.release()
-                  #  cv2.destroyAllWindows()
-                   # quit()
+                if cv2.waitKey(5) & 0xFF == ord('q'):
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    quit()
 
-                time.sleep(2.0)
+                # print(time.time()-start)
+
+            prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
+            char_index = np.argmax(prediction)
+            confidence = round(prediction[0,char_index]*100, 1)
+            predicted_char = letters[char_index]
+            print(predicted_char, confidence)
+            time.sleep(2.0)
+        
+            
+            # timeout = time.time() + 2
+            # while True:
+                    
+            #     if time.time() > timeout:
+            #         break
+
+            #     # Read Feed
+            #     ret, frame = cap.read()
+                
+            #     # Made detections
+            #     image, results = mediapipe_detection(frame, holistic)
+            #     draw_styled_landmarks(image, results)
+            #     keypoints = extract_keypoints(results)
+            #     FRAME_STORE.append(keypoints)
+                
+            #     # Show to screen
+            #     # image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+            #     cv2.imshow('OpenCV Feed', image)
+                
+            #     # Breaking gracefully
+            #     if cv2.waitKey(5) & 0xFF == ord('q'):
+            #             cap.release()
+            #             cv2.destroyAllWindows()
+            #             quit()
+                
+            # prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
+            # char_index = np.argmax(prediction)
+            # confidence = round(prediction[0,char_index]*100, 1)
+            # predicted_char = letters[char_index]
+            # # s.send(predicted_char)
+
+            # # print prediction
+            # print(predicted_char, confidence)
+
+            # print("Wait 2 seconds \n")
+            
+            #image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+
+            #cv2.imshow('OpenCV Feed', image)
+            # Breaking gracefully
+            #if cv2.waitKey(5) & 0xFF == ord('q'):
+                #   cap.release()
+                #  cv2.destroyAllWindows()
+                # quit()
+
+            # time.sleep(2.0)
 
 if __name__ == "__main__":
      
     # Load in the ML Model
-    model = load_model('model3.h5')
+    model = load_model('presentation_model.h5')
 
     # Class Instantiation
     params = Params()
