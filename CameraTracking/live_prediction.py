@@ -85,20 +85,10 @@ def prediction(params, model, letters):
             pass
 
         print("\nCamera is connected and Everything is Configured!")
+        curr_sen = []
+        temp = []
+        curr_letters = ""
 
-<<<<<<< HEAD
-            curr_sen = []
-            temp = []
-            curr_letters = ""
-
-            print("Beginning Predictions:\n")
-            while cap.isOpened():
-                FRAME_STORE = []
-                for frame_num in range(params.FRAME_COUNT):
-                    start = time.time()
-		            
-                    # Read Feed         
-=======
         print("Beginning Predictions:\n")
         while cap.isOpened():
             FRAME_STORE = []
@@ -106,7 +96,6 @@ def prediction(params, model, letters):
                 # start = time.time()
                 
                 # Read Feed         
->>>>>>> 4efc031b030466d87f01de790a5f42601fc137c9
 
                 ret, frame = cap.read()
                 # start = time.time()
