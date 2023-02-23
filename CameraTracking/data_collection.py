@@ -78,7 +78,7 @@ def collect_data(params, letter):
                target_folder = os.path.join(os.path.join(params.COLLECTION_FOLDER), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i+40), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+20), set_of_frames)
                     
                
                print("\n Program is Finished \n")
@@ -91,7 +91,7 @@ if __name__ == "__main__":
      
      params = Params()
      
-     letter = 'i'
+     letter = 'nothing'
      
      # Create Folder
      try:
