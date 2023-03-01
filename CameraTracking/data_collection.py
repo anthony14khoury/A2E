@@ -14,7 +14,7 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-letter = 'a'
+letter = 'B'
 collection_folder = 'HandsCollection'
 
 # Collection Types: "video" or "static"
@@ -22,12 +22,12 @@ type = "static"
 
 
 # Constants for Prediction Script
-# getReady = "Prepare to Sign!"
-# go = "Go!"
-# font = cv2.FONT_HERSHEY_SIMPLEX
-# color = (255,0,255)
-# fontScale = 2
-# thickness = 4
+getReady = "Prepare to Sign!"
+go = "Go!"
+font = cv2.FONT_HERSHEY_SIMPLEX
+color = (255,0,255)
+fontScale = 2
+thickness = 4
 
 
 # Create Folder
@@ -126,31 +126,49 @@ if type == "video":
                
 if type == "static":
      
-     with mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
+     with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
      
           # Read in Image
-          image_loc = "D:/Code/A2E/asl_dataset/asl_alphabet_train/asl_alphabet_train/A/A1.jpg"
-          image = cv2.imread(image_loc)
+          folder = r"C:\Users\anthony.rahbany\Documents\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
           
-          # Made detections
-          image.flags.writeable = False
-          image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-          results = hands.process(image)
+          SEQUENCE_STORE = []
+          for sequence in range(params.SEQUENCE_COUNT):
+               
+               FRAME_STORE = []
+               for frame_num in range(1, params.FRAME_COUNT + 1):
+                    
+                    image_loc = folder + "\{}{}.jpg".format(letter, frame_num)
+                    image = cv2.imread(image_loc)
+                    
+                    if image is None:
+                         print("Image not found")
+                         quit()
+                    
+                    # Made detections
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    results = hands.process(image)
+                    
+                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                    image = draw_styled_landmarks(image, results)
+                    
+                    print('Handedness:', results.multi_handedness)
+                    if results.multi_handedness is None:
+                         cv2.imwrite(".\{}{}.jpg".format(letter, frame_num), image)
+                    
+                    else:
+                         FRAME_STORE.append(extract_hand_keypoints(results))
+                    
+               
+               print("Done with Sequence: {}".format(sequence))
+               SEQUENCE_STORE.append(FRAME_STORE)
           
-          print('Handedness:', results.multi_handedness)
+          print("Done with all Sequences for {}".format(letter))
           
-          image.flags.writeable = True
-          image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-          image = draw_styled_landmarks(image, results)
-          results = extract_hand_keypoints(results)
-          # FRAME_STORE.append(extract_hand_keypoints(results))
-          
-          
-          # Display Image
-          
-          # cv2.imshow('OpenCV Feed', image)
-          # cv2.imwrite('./A1.png', image)
-          print(results)
+          """ Writing Files """
+          target_folder = os.path.join(os.path.join(collection_folder), letter)
+          for i in range(params.SEQUENCE_COUNT):
+               set_of_frames = np.array(SEQUENCE_STORE[i])
+               np.save(target_folder + "/" + letter + str(i+0), set_of_frames)
           
           
                

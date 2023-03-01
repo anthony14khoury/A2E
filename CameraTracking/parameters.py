@@ -40,6 +40,23 @@ def extract_hand_keypoints(results):
      return np.concatenate([lh, rh])
 
 
+def extract_static_hand_keypoints(results):
+     lh = np.zeros(21*3)
+     rh = np.zeros(21*3)
+     
+     if results.multi_hand_landmarks:
+          for hand_landmarks in results.multi_hand_landmarks:
+               # Get hand index to check label (left or right)
+               handIndex = results.multi_hand_landmarks.index(hand_landmarks)
+               handLabel = results.multi_handedness[handIndex].classification[0].label
+               if(handLabel == "Right"):
+                    lh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
+               else:
+                    rh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
+     
+     return np.concatenate([lh, rh])
+
+
 
 
 def extract_holistic_keypoints(results):
