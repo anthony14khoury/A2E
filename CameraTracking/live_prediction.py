@@ -7,13 +7,13 @@ import time
 import mediapipe as mp
 from parameters import Params, mediapipe_detection, extract_hand_keypoints
 import socket
-from word_detection import add_spaces
+# from word_detection import add_spaces
 
 # Parameter Class
 params = Params()
 
 # ML Model
-model = load_model('aesmodel.h5')
+model = load_model('./Models/abcnothing2.h5')
 letters = params.LETTERS
 
 # Mediapipe Modules
@@ -36,14 +36,14 @@ PORT = 4000 # The port used by the server
 
 def draw_styled_landmarks(image, results):
     
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                mp_drawing.draw_landmarks(image, hand_landmarks,
-                        mp_hands.HAND_CONNECTIONS,
-                        mp_drawing_styles.get_default_hand_landmarks_style(),
-                        mp_drawing_styles.get_default_hand_connections_style())
+    image.flags.writeable = True
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(image, hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style())
 
 
 # Use CV2 Functionality to create a Video Stream
@@ -80,14 +80,15 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             draw_styled_landmarks(image, results)
             FRAME_STORE.append(extract_hand_keypoints(results))
+            
+            # Display Image
+            cv2.imshow('OpenCV Feed', image)
 
+            # Breaking gracefully
             if cv2.waitKey(5) & 0xFF == ord('q'):
                 cap.release()
                 cv2.destroyAllWindows()
                 quit()
-
-            # Just Show to screen
-            cv2.imshow('OpenCV Feed', image)
 
 
         prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
@@ -96,17 +97,17 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
         predicted_char = letters[char_index]
         print(predicted_char, confidence)
         
-        if len(predicted_char) > 1:
-            #ipdb.set_trace()
-            curr_sen = np.concatenate((curr_sen,temp))
-            curr_letters = ""
-            curr_sen = np.append(curr_sen,predicted_char)
-            temp = []
-        else:
-            curr_letters += predicted_char
-            answer,temp = add_spaces(curr_letters, curr_sen)  #Print out most likely placement of spaces, add dashes if none found
+        # if len(predicted_char) > 1:
+        #     #ipdb.set_trace()
+        #     curr_sen = np.concatenate((curr_sen,temp))
+        #     curr_letters = ""
+        #     curr_sen = np.append(curr_sen,predicted_char)
+        #     temp = []
+        # else:
+        #     curr_letters += predicted_char
+        #     answer,temp = add_spaces(curr_letters, curr_sen)  #Print out most likely placement of spaces, add dashes if none found
         
-        print(answer)
+        # print(answer)
         
         
         """ Continuous Camera Share """
