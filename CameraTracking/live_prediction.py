@@ -13,7 +13,7 @@ import socket
 params = Params()
 
 # ML Model
-model = load_model('./Models/abcnothing2.h5')
+model = load_model('static_big_model.h5')
 letters = params.LETTERS
 
 # Mediapipe Modules
@@ -53,7 +53,7 @@ while not cap.isOpened():
     pass
 print("Camera is connected")
 
-with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
+with mp_hands.Hands(model_complexity=1, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
 
     # Stay open while the camera is activated
     while cap.isOpened():

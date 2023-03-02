@@ -14,7 +14,6 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-letter = 'B'
 collection_folder = 'HandsCollection'
 
 # Collection Types: "video" or "static"
@@ -30,12 +29,6 @@ fontScale = 2
 thickness = 4
 
 
-# Create Folder
-try:
-     os.makedirs(os.path.join(collection_folder, letter))
-except:
-     print("Folder already exists")
-     pass
 
 
 def draw_styled_landmarks(image, results):
@@ -51,6 +44,15 @@ def draw_styled_landmarks(image, results):
           
 
 if type == "video":
+     
+     letter = 'A'
+     
+     # Create Folder
+     try:
+          os.makedirs(os.path.join(collection_folder, letter))
+     except:
+          print("Folder already exists")
+          pass
 
      # Use CV2 Functionality to create a Video Stream
      # cap = cv2.VideoCapture(0, cv2.CAP_ANY)
@@ -129,53 +131,69 @@ if type == "static":
      with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
      
           # Read in Image
-          folder = r"C:\Users\anthony.rahbany\Documents\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
+          # folder = r"C:\Users\anthony.rahbany\Documents\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
+          # letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+          letters = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']  
+          skips = 10
+          skip_cout = 0
+          captured_count = 0
           
-          SEQUENCE_STORE = []
-          for sequence in range(params.SEQUENCE_COUNT):
+          for letter in letters:
                
-               FRAME_STORE = []
-               for frame_num in range(1, params.FRAME_COUNT + 1):
+               # Create Folder
+               try:
+                    os.makedirs(os.path.join(collection_folder, letter))
+               except:
+                    print("Folder already exists")
+                    pass
+               
+               folder = r"D:\Code\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
+               num_images = len(os.listdir(folder)) 
+               
+               SEQUENCE_STORE = []
+               for sequence in range(0, num_images, skips):
                     
-                    image_loc = folder + "\{}{}.jpg".format(letter, frame_num)
-                    image = cv2.imread(image_loc)
-                    
-                    if image is None:
-                         print("Image not found")
-                         quit()
-                    
-                    # Made detections
-                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                    results = hands.process(image)
-                    
-                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                    image = draw_styled_landmarks(image, results)
-                    
-                    print('Handedness:', results.multi_handedness)
-                    if results.multi_handedness is None:
-                         cv2.imwrite(".\{}{}.jpg".format(letter, frame_num), image)
-                    
-                    else:
-                         FRAME_STORE.append(extract_hand_keypoints(results))
-                    
+                    FRAME_STORE = []
+                    image_move = 0
+                    while True:
+                         image_loc = folder + "\{}{}.jpg".format(letter, sequence + 1 + image_move)
+                         if captured_count % 2 == 0:
+                              image = cv2.imread(image_loc)
+                         else:
+                              # Flip for both left and right hand images
+                              image = cv2.flip(cv2.imread(image_loc), 1)
+                         
+                         if image is None:
+                              print("Image not found")
+                              quit()
+                              
+                         else:
+                              # Made detections
+                              image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                              results = hands.process(image)
+                              
+                              print('Handedness:', results.multi_handedness)
+                              if results.multi_handedness is None:
+                                   image_move += 1
+                                   if image_move >= skips-1:
+                                        print("Skipped Image: ".format(letter, sequence + 1 + image_move))
+                                        skip_cout += 1
+                                        break
+                              
+                              else:
+                                   # Getting 30 frames
+                                   for i in range(30):
+                                        FRAME_STORE.append(extract_hand_keypoints(results))
+                                   SEQUENCE_STORE.append(FRAME_STORE)
+                                   captured_count += 1
+                                   break
                
-               print("Done with Sequence: {}".format(sequence))
-               SEQUENCE_STORE.append(FRAME_STORE)
-          
-          print("Done with all Sequences for {}".format(letter))
-          
-          """ Writing Files """
-          target_folder = os.path.join(os.path.join(collection_folder), letter)
-          for i in range(params.SEQUENCE_COUNT):
-               set_of_frames = np.array(SEQUENCE_STORE[i])
-               np.save(target_folder + "/" + letter + str(i+0), set_of_frames)
-          
-          
+               print("Done with all Sequences for {}".format(letter))
+               print("Skip Count: {}".format(skip_cout))
+               print("Captured Count: {}".format(captured_count))
                
-               
-               
-               
-               
-               
-               
-               
+               """ Writing Files """
+               target_folder = os.path.join(os.path.join(collection_folder), letter)
+               for i in range(len(SEQUENCE_STORE)):
+                    set_of_frames = np.array(SEQUENCE_STORE[i])
+                    np.save(target_folder + "/" + letter + str(i), set_of_frames)

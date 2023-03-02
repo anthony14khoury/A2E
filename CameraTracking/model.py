@@ -9,19 +9,21 @@ from parameters import Params
 import datetime
 import matplotlib.pyplot as plt
 
-def gathering_data(letters, label_map):
+
+
+def gathering_data(folder, letters, label_map):
     sequences, labels = [], []
     
     for letter in letters:
-        dir_length = len(os.listdir(os.path.join("DataCollection", letter)))
+        dir_length = len(os.listdir(os.path.join(folder, letter)))
         
         for i in range(0, dir_length):
 
             # Grab all 30 frames and append them to window
-            res = np.load(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
+            res = np.load(os.path.join(folder, letter, letter + str(i) + ".npy"))
             sequences.append(res)
             labels.append(label_map[letter])
-            print(os.path.join("DataCollection", letter, letter + str(i) + ".npy"))
+            print(os.path.join(folder, letter, letter + str(i) + ".npy"))
     
     return sequences, labels
 
@@ -52,14 +54,14 @@ def compute_model(X, y, letters):
 
     print("\t Compiling and Fitting Model")
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=8, min_delta=0.001, mode='max')
+    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=10, min_delta=0.1, mode='max')
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-    history = model.fit(X_train, y_train, epochs=80, verbose=1, validation_data=(X_test, y_test), callbacks=[])
+    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
     print("Saving Model")
     
-    model.save('presentation_model.h5')
+    model.save('static_big_model.h5')
     
     return history
 
@@ -71,8 +73,10 @@ if __name__ == "__main__":
     letters = params.LETTERS
     label_map = {label:letters for letters, label in enumerate(letters)}
     
+    folder = "HandsCollection"
+    
     print("\t Gathering data to input into model")
-    sequences, labels = gathering_data(letters, label_map)
+    sequences, labels = gathering_data(folder, letters, label_map)
     
     X = np.array(sequences)
     y = to_categorical(labels).astype(int)

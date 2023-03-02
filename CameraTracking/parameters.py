@@ -8,9 +8,10 @@ class Params():
           self.EMPTY_HAND = [0] * 120
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 20
-          self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 'my', 'name', 'nothing'])
+          # self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 'my', 'name', 'nothing'])
           # self.LETTERS = np.array(['a', 'e', 's', 'nothing'])
           # self.LETTERS = np.array(['hello', 'my', 'name is', 'j', 'o', 'e', 'nothing'])
+          self.LETTERS = np.array(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'])
 
 
 def mediapipe_detection(image, model):
