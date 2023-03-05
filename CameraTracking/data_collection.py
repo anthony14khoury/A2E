@@ -29,8 +29,6 @@ fontScale = 2
 thickness = 4
 
 
-
-
 def draw_styled_landmarks(image, results):
      if results.multi_hand_landmarks:
           for hand_landmarks in results.multi_hand_landmarks:
@@ -128,15 +126,12 @@ if type == "video":
                
 if type == "static":
      
-     with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
+     letters = ['Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+     skips = 10
+     skip_cout = 0
+     captured_count = 0
      
-          # Read in Image
-          # folder = r"C:\Users\anthony.rahbany\Documents\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
-          # letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-          letters = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']  
-          skips = 10
-          skip_cout = 0
-          captured_count = 0
+     with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
           
           for letter in letters:
                
@@ -173,6 +168,8 @@ if type == "static":
                               results = hands.process(image)
                               
                               print('Handedness:', results.multi_handedness)
+                              
+                              # If there are no registered hands in the frame
                               if results.multi_handedness is None:
                                    image_move += 1
                                    if image_move >= skips-1:
