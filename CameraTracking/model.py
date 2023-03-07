@@ -4,10 +4,10 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
-from keras.callbacks import EarlyStopping, TensorBoard
+from keras import optimizers
+from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from parameters import Params
 import datetime
-import matplotlib.pyplot as plt
 
 
 
@@ -15,6 +15,7 @@ def gathering_data(folder, letters, label_map):
     sequences, labels = [], []
     
     for letter in letters:
+        
         dir_length = len(os.listdir(os.path.join(folder, letter)))
         
         for i in range(0, dir_length):
@@ -28,59 +29,50 @@ def gathering_data(folder, letters, label_map):
     return sequences, labels
 
 
-def compute_model(X, y, letters):
+params = Params()
     
-    print ("\t Train Test Split")
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10)
+letters = params.LETTERS
+label_map = {label:letters for letters, label in enumerate(letters)}
 
-    print("\t Defining Model")
+folder = "DataCollection"
 
-    activation = 'tanh'
-    model = Sequential()
-    model.add(LSTM(64, return_sequences=True, activation=activation, input_shape=(30,126)))
-    model.add(LSTM(128, return_sequences=True, activation=activation))
-    model.add(LSTM(64, return_sequences=False, activation=activation))
-    model.add(Dense(64, activation=activation))
-    model.add(Dense(32, activation=activation))
-    model.add(Dense(letters.shape[0], activation='softmax'))
-    
-    earlystop_callback = EarlyStopping(
-        monitor='categorical_accuracy', # monitor validation loss
-        min_delta=0.001, # minimum change in the monitored quantity to qualify as an improvement
-        patience=12, # number of epochs with no improvement after which training will be stopped
-        verbose=1, # print message when training stops
-        restore_best_weights=True # restore the weights of the best iteration when stopping training
-    )
+# Model File
+model_file = "motion_model1.h5"
 
-    print("\t Compiling and Fitting Model")
-    model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    # early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=10, min_delta=0.1, mode='max')
-    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-    history = model.fit(X_train, y_train, epochs=200, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
+print("\t Gathering data to input into model")
+sequences, labels = gathering_data(folder, letters, label_map)
 
-    print("Saving Model")
-    
-    model.save('static_big_model.h5')
-    
-    return history
+X = np.array(sequences)
+y = to_categorical(labels).astype(int)
 
-
-if __name__ == "__main__":
-    
-    params = Params()
-    
-    letters = params.LETTERS
-    label_map = {label:letters for letters, label in enumerate(letters)}
-    
-    folder = "HandsCollection"
-    
-    print("\t Gathering data to input into model")
-    sequences, labels = gathering_data(folder, letters, label_map)
-    
-    X = np.array(sequences)
-    y = to_categorical(labels).astype(int)
-    
-    print("\t Creating and Saving the ML Model:")
-    history = compute_model(X, y, letters)
   
+
+    
+print ("\t Train Test Split")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10)
+
+print("\t Defining Model")
+
+activation = 'tanh'
+model = Sequential()
+model.add(LSTM(64, return_sequences=True, activation=activation, input_shape=(30,126)))
+model.add(LSTM(128, return_sequences=True, activation=activation))
+model.add(LSTM(64, return_sequences=False, activation=activation))
+model.add(Dense(64, activation=activation))
+model.add(Dense(32, activation=activation))
+model.add(Dense(letters.shape[0], activation='softmax'))
+
+earlystop_callback = EarlyStopping(monitor='categorical_accuracy', min_delta=0.001, patience=12, verbose=1, restore_best_weights=True)
+
+checkpoint = ModelCheckpoint(filepath=model_file, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+
+log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+# model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+optimizer = optimizers.Adam(learning_rate=0.01)
+history = model.fit(X_train, y_train, epochs=500, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback, checkpoint])
+
+print("Model is Done")
+
+# model.save('static_big_model.h5')

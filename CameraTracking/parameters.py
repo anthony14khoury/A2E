@@ -5,13 +5,10 @@ class Params():
      def __init__(self):
           self.FRAME_STORE = []
           self.SEQUENCE_STORE = []
-          self.EMPTY_HAND = [0] * 120
           self.FRAME_COUNT = 30
           self.SEQUENCE_COUNT = 20
-          # self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 'my', 'name', 'nothing'])
-          # self.LETTERS = np.array(['a', 'e', 's', 'nothing'])
-          # self.LETTERS = np.array(['hello', 'my', 'name is', 'j', 'o', 'e', 'nothing'])
-          self.LETTERS = np.array(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'])
+          # self.LETTERS = np.array(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'nothing'])
+          self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'nothing', 'hello', 'my', 'name is'])
 
 
 def mediapipe_detection(image, model):
@@ -39,24 +36,6 @@ def extract_hand_keypoints(results):
                     rh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
      
      return np.concatenate([lh, rh])
-
-
-def extract_static_hand_keypoints(results):
-     lh = np.zeros(21*3)
-     rh = np.zeros(21*3)
-     
-     if results.multi_hand_landmarks:
-          for hand_landmarks in results.multi_hand_landmarks:
-               # Get hand index to check label (left or right)
-               handIndex = results.multi_hand_landmarks.index(hand_landmarks)
-               handLabel = results.multi_handedness[handIndex].classification[0].label
-               if(handLabel == "Right"):
-                    lh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
-               else:
-                    rh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
-     
-     return np.concatenate([lh, rh])
-
 
 
 

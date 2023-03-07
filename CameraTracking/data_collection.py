@@ -14,10 +14,10 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-collection_folder = 'HandsCollection'
+collection_folder = 'DataCollection'
 
 # Collection Types: "video" or "static"
-type = "static"
+type = "video"
 
 
 # Constants for Prediction Script
@@ -27,8 +27,6 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 color = (255,0,255)
 fontScale = 2
 thickness = 4
-
-
 
 
 def draw_styled_landmarks(image, results):
@@ -45,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'A'
+     letter = 'family'
      
      # Create Folder
      try:
@@ -72,7 +70,6 @@ if type == "video":
                
                SEQUENCE_STORE = []
                for sequence in range(params.SEQUENCE_COUNT):
-                    
                     FRAME_STORE = []
                     for frame_num in range(params.FRAME_COUNT):
                                                   
@@ -103,6 +100,8 @@ if type == "video":
                               cv2.destroyAllWindows()
                               quit()
                     
+                    print('Handedness:', results.multi_handedness)
+                    
                     print("Done with Sequence: {}".format(sequence))
                     SEQUENCE_STORE.append(FRAME_STORE)
                     
@@ -117,7 +116,7 @@ if type == "video":
                target_folder = os.path.join(os.path.join(collection_folder), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i+0), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+20), set_of_frames)
                     
                
                print("\n Program is Finished \n")
@@ -128,15 +127,12 @@ if type == "video":
                
 if type == "static":
      
-     with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
+     letters = ['Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+     skips = 10
+     skip_cout = 0
+     captured_count = 0
      
-          # Read in Image
-          # folder = r"C:\Users\anthony.rahbany\Documents\A2E\asl_dataset\asl_alphabet_train\asl_alphabet_train\{}".format(letter)
-          # letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-          letters = ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']  
-          skips = 10
-          skip_cout = 0
-          captured_count = 0
+     with mp_hands.Hands(model_complexity=1, static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5) as hands:
           
           for letter in letters:
                
@@ -173,6 +169,8 @@ if type == "static":
                               results = hands.process(image)
                               
                               print('Handedness:', results.multi_handedness)
+                              
+                              # If there are no registered hands in the frame
                               if results.multi_handedness is None:
                                    image_move += 1
                                    if image_move >= skips-1:

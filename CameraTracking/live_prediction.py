@@ -1,8 +1,6 @@
 from keras.models import load_model
 import cv2
 import numpy as np
-import os
-from matplotlib import pyplot as plt
 import time
 import mediapipe as mp
 from parameters import Params, mediapipe_detection, extract_hand_keypoints
@@ -13,7 +11,7 @@ import socket
 params = Params()
 
 # ML Model
-model = load_model('static_big_model.h5')
+model = load_model('./A2E/CameraTracking/Models/128_model_tanh_6.h5')
 letters = params.LETTERS
 
 # Mediapipe Modules
@@ -26,8 +24,8 @@ getReady = "Prepare to Sign!"
 go = "Go!"
 font = cv2.FONT_HERSHEY_SIMPLEX
 color = (255,0,255)
-fontScale = 2
-thickness = 4
+fontScale = 1
+thickness = 2
 
 # Socket Settings
 HOST = "10.136.49.55" # The server's hostname or IP address
@@ -44,6 +42,8 @@ def draw_styled_landmarks(image, results):
                     mp_hands.HAND_CONNECTIONS,
                     mp_drawing_styles.get_default_hand_landmarks_style(),
                     mp_drawing_styles.get_default_hand_connections_style())
+            
+    return image
 
 
 # Use CV2 Functionality to create a Video Stream
@@ -53,7 +53,7 @@ while not cap.isOpened():
     pass
 print("Camera is connected")
 
-with mp_hands.Hands(model_complexity=1, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
+with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
 
     # Stay open while the camera is activated
     while cap.isOpened():
@@ -77,8 +77,8 @@ with mp_hands.Hands(model_complexity=1, min_detection_confidence=0.7, min_tracki
             results = hands.process(image)
             
             image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            draw_styled_landmarks(image, results)
+            # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = draw_styled_landmarks(image, results)
             FRAME_STORE.append(extract_hand_keypoints(results))
             
             # Display Image
@@ -121,7 +121,8 @@ with mp_hands.Hands(model_complexity=1, min_detection_confidence=0.7, min_tracki
             ret, frame = cap.read()
                 
             # Show to screen
-            image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+            to_screen = "{}: {}%".format(predicted_char, confidence)
+            image = cv2.putText(image, to_screen, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
             cv2.imshow('OpenCV Feed', image)
                 
             # Breaking gracefully
