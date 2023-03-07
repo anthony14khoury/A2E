@@ -4,7 +4,8 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
-from keras.callbacks import EarlyStopping, TensorBoard
+from keras import optimizers
+from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from parameters import Params
 import datetime
 
@@ -14,6 +15,7 @@ def gathering_data(folder, letters, label_map):
     sequences, labels = [], []
     
     for letter in letters:
+        
         dir_length = len(os.listdir(os.path.join(folder, letter)))
         
         for i in range(0, dir_length):
@@ -32,7 +34,10 @@ params = Params()
 letters = params.LETTERS
 label_map = {label:letters for letters, label in enumerate(letters)}
 
-folder = "HandsCollection"
+folder = "DataCollection"
+
+# Model File
+model_file = "motion_model1.h5"
 
 print("\t Gathering data to input into model")
 sequences, labels = gathering_data(folder, letters, label_map)
@@ -57,21 +62,17 @@ model.add(Dense(64, activation=activation))
 model.add(Dense(32, activation=activation))
 model.add(Dense(letters.shape[0], activation='softmax'))
 
-earlystop_callback = EarlyStopping(
-    monitor='categorical_accuracy', # monitor validation loss
-    min_delta=0.001, # minimum change in the monitored quantity to qualify as an improvement
-    patience=12, # number of epochs with no improvement after which training will be stopped
-    verbose=1, # print message when training stops
-    restore_best_weights=True # restore the weights of the best iteration when stopping training
-)
+earlystop_callback = EarlyStopping(monitor='categorical_accuracy', min_delta=0.001, patience=12, verbose=1, restore_best_weights=True)
 
-print("\t Compiling and Fitting Model")
-model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-# early_stopping = EarlyStopping(monitor='categorical_accuracy', patience=10, min_delta=0.1, mode='max')
+checkpoint = ModelCheckpoint(filepath=model_file, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
-history = model.fit(X_train, y_train, epochs=500, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback])
 
-print("Saving Model")
+# model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+optimizer = optimizers.Adam(learning_rate=0.01)
+history = model.fit(X_train, y_train, epochs=500, verbose=1, validation_data=(X_test, y_test), callbacks=[tensorboard_callback, checkpoint])
 
-model.save('static_big_model.h5')
+print("Model is Done")
+
+# model.save('static_big_model.h5')

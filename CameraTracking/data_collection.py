@@ -14,10 +14,10 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-collection_folder = 'HandsCollection'
+collection_folder = 'DataCollection'
 
 # Collection Types: "video" or "static"
-type = "static"
+type = "video"
 
 
 # Constants for Prediction Script
@@ -43,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'A'
+     letter = 'family'
      
      # Create Folder
      try:
@@ -70,7 +70,6 @@ if type == "video":
                
                SEQUENCE_STORE = []
                for sequence in range(params.SEQUENCE_COUNT):
-                    
                     FRAME_STORE = []
                     for frame_num in range(params.FRAME_COUNT):
                                                   
@@ -101,6 +100,8 @@ if type == "video":
                               cv2.destroyAllWindows()
                               quit()
                     
+                    print('Handedness:', results.multi_handedness)
+                    
                     print("Done with Sequence: {}".format(sequence))
                     SEQUENCE_STORE.append(FRAME_STORE)
                     
@@ -115,7 +116,7 @@ if type == "video":
                target_folder = os.path.join(os.path.join(collection_folder), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i+0), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+20), set_of_frames)
                     
                
                print("\n Program is Finished \n")
