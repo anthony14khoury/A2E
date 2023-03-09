@@ -43,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'family'
+     letter = 'y'
      
      # Create Folder
      try:
@@ -69,12 +69,16 @@ if type == "video":
                     ret, frame = cap.read()
                
                SEQUENCE_STORE = []
+               params.SEQUENCE_COUNT = 40
                for sequence in range(params.SEQUENCE_COUNT):
                     FRAME_STORE = []
                     for frame_num in range(params.FRAME_COUNT):
                                                   
                          # Capture a frame
                          success, image = cap.read()
+                         
+                         if sequence % 2 == 0:
+                              image = cv2.flip(image, 1)
                          
                          # Error Checking
                          if not success:
@@ -116,7 +120,7 @@ if type == "video":
                target_folder = os.path.join(os.path.join(collection_folder), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i+20), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+40), set_of_frames)
                     
                
                print("\n Program is Finished \n")
