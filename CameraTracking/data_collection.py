@@ -43,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'y'
+     letter = 'o'
      
      # Create Folder
      try:
@@ -77,8 +77,8 @@ if type == "video":
                          # Capture a frame
                          success, image = cap.read()
                          
-                         if sequence % 2 == 0:
-                              image = cv2.flip(image, 1)
+                         # if sequence % 2 == 0:
+                         #      image = cv2.flip(image, 1)
                          
                          # Error Checking
                          if not success:
