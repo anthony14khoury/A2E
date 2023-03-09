@@ -46,7 +46,7 @@ def process_frames(qq, FRAME_STORE, DRAWING_STORE):
         # Produces the hand framework overlay ontop of the hand, you can choose the colour here too)
         if frame is None:
             continue
-
+        time.sleep()
         results = hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         # In case the system sees multiple hands this if statment deals with that and produces another hand overlay
         keypoints = extract_keypoints(results)
