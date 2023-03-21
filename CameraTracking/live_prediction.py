@@ -11,7 +11,7 @@ import socket
 params = Params()
 
 # ML Model
-model = load_model('./Models/128_model_tanh_6.h5')
+model = load_model('./Models/128_26_15_model_tanh.h5')
 letters = params.LETTERS
 
 # Mediapipe Modules

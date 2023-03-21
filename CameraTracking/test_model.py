@@ -1,41 +1,40 @@
 from parameters import Params
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 from keras.models import load_model
 import mediapipe as mp
 import numpy as np
 import cv2
 import os
+print("Import and Dependencies Loaded")
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
      
-
-collection_folder = 'HandsCollection'
 skips = 10
 skip_cout = 0
 captured_count = 0
 
-debug = True
-if debug:
-     collection_folder = "./A2E/CameraTracking/" + collection_folder
-
 params = Params()
 letters = params.LETTERS
-# test_letters = ['b']
-test_letters = letters
+test_letters = ['a', 'again', 'b', 'c', 'can', 'd', 'drink', 'e', 'f', 'family', 'g', 'h', 'hello', 'i', 'j', 'k', 'l', 'm', 'me', 'my', 'n', 'nothing', 'o', 'p', 'please', 'q', 'r', 's', 'sorry', 't', 'thank you', 'u', 'v', 'w', 'x', 'y', 'yes', 'z']
+# test_letters = ['my']
+# letters removed = o, 
+letter_count = len(test_letters)
 labels = []
 
-letter_count = 0
-bool = True
+collection_folder = "./A2E/CameraTracking/ValidationData"
+if os.path.exists(collection_folder):
+     print("Folder Found")
+else:
+    collection_folder = './ValidationData'
+
 for subdir, dirs, files in os.walk(collection_folder):
-     if bool: letter_count = len(dirs)
-     bool = False
-     
-     if subdir[-1] in test_letters:
+     if subdir.split('\\')[-1] in test_letters:
           for file in files:
-               labels.append(file[0])
+               labels.append(subdir.split('\\')[-1])
 
 
           
@@ -44,42 +43,50 @@ sequences = []
 for letter in test_letters:
      try:
           dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
+          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
+          
+          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))          
           
           for i in range(0, dir_length):
                sequences.append(np.load(os.path.join(collection_folder, letter, letter + str(i) + ".npy")))
-               # print(os.path.join(collection_folder, letter, letter + str(i) + ".npy"))
-          
      except:
-          # print("No validation test for letter: {}".format(letter))
           dummy = 0
+print("All Data is Loaded")
 
 
 
-model = load_model("./A2E/CameraTracking/Models/128_model_tanh_6.h5")
-     
+try:
+     model = load_model("./Models/256_26_15_model_tanh.h5")
+except:
+     model = load_model("./A2E/CameraTracking/Models/256_26_15_model_tanh.h5")
+print("Model is Loaded")
+
+
+
+# accuracies, num_per_label = [], []
 predictions = []
-confidences = []
 for (label, sequence) in zip(labels, sequences):
+     # accuracy_count, label_count = 0, 0
+     
      prediction = model.predict(np.expand_dims(sequence, axis=0), verbose=0)
      char_index = np.argmax(prediction)
      confidence = round(prediction[0,char_index]*100, 1)
      predicted_char = letters[char_index]
      
-     print("Actual: {} | Predicted: {} | Confidence: {}".format(label, predicted_char, confidence))
-     
+     print("Actual: {} | Predicted: {} | Confidence: {}%".format(label, predicted_char, confidence))
+
      predictions.append(predicted_char)
-     confidences.append(confidence)
+     
 
-accuracy = sum(1 for x,y in zip(labels, predictions) if x == y) / len(labels)
-print("Total Accuracy: {}".format(accuracy))
-
-cm = confusion_matrix(labels, predictions)
-
-# Accuracy per Label
 print()
-acc_per_label = {}
-for i in range(letter_count): # change it to letter_count if you're testing all the letters
-     label_total = sum(cm[i, :])
-     label_correct = cm[i, i]
-     print("Letter: {} | Accuracy: {}".format(test_letters[i], label_correct / label_total))
+unique_labels = sorted(list(set(labels)))
+for label in unique_labels:
+    indices = [i for i, x in enumerate(labels) if x == label]
+    true_labels_subset = [labels[i] for i in indices]
+    predicted_labels_subset = [predictions[i] for i in indices]
+    accuracy = accuracy_score(true_labels_subset, predicted_labels_subset)
+    print("Letter: {} | Accuracy: {}".format(label, accuracy))
+
           
+accuracy = sum(1 for x,y in zip(labels, predictions) if x == y) / len(labels)
+print("\nTotal Accuracy: {}%".format(100*accuracy))
