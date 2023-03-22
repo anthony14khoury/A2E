@@ -1,7 +1,7 @@
 import socket
 import time
 
-HOST = "10.136.49.55" # Tablet on eduroam - The server's hostname or IP address
+HOST = "10.136.140.5" # Tablet on eduroam - The server's hostname or IP address
 PORT = 4000 # The port used by the server
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

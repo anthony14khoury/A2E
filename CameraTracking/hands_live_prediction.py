@@ -25,7 +25,7 @@ params = Params()
 letters = params.LETTERS
 
 # socket settings
-HOST = "10.16.39.55"
+HOST = "10.136.140.5"
 PORT = 4000
 
 def extract_keypoints(results):
@@ -55,7 +55,7 @@ with handsModule.Hands(model_complexity=0, static_image_mode=False, min_detectio
             FRAME_STORE = []
             for frame_num in range(params.FRAME_COUNT):
                 ret, frame = cap.read()
-                start = time.time()
+                #start = time.time()
                 # Unedit the below line if your live feed is produced upsidedown
                 # flipped = cv2.flip(frame, flipCode = -1)
                 #frame = cv2.resize(frame, (640, 480))
@@ -72,7 +72,8 @@ with handsModule.Hands(model_complexity=0, static_image_mode=False, min_detectio
                 #if results.multi_hand_landmarks != None:
                 #   for handLandmarks in results.multi_hand_landmarks:
                 #      drawingModule.draw_landmarks(frame, handLandmarks, handsModule.HAND_CONNECTIONS)
-                print(time.time()-start)
+               # print(time.time()-start)
+                print(frame_num)
                 # Below shows the current frame to the desktop
                 #cv2.imshow("Frame", frame)
                 #key = cv2.waitKey(1) & 0xFF
@@ -83,6 +84,7 @@ with handsModule.Hands(model_complexity=0, static_image_mode=False, min_detectio
             confidence = round(prediction[0,char_index]*100, 1)
             predicted_char = letters[char_index]
             print(predicted_char, confidence)
-            if(predicted_char != "nothing")
-                s.send(predicted_char)
+            if(predicted_char != "nothing"):
+                s.send(bytes(predicted_char, encoding='utf-8'))
+                var = s.recv(1024)
             time.sleep(2)

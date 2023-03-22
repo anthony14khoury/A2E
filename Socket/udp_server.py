@@ -8,7 +8,7 @@ BUFF_SIZE = 65536
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
 host_name = socket.gethostname()
-host_ip = '10.136.220.172'
+host_ip = '10.136.63.60'
 port = 3000
 socket_address = (host_ip,port)
 server_socket.bind(socket_address)
@@ -20,16 +20,22 @@ fps,st,frames_to_count,cnt = (0,0,20,0)
 while True:
 	msg,client_addr = server_socket.recvfrom(BUFF_SIZE)
 	print('GOT connection from ',client_addr)
-	WIDTH=140
+	WIDTH=50
 	while(vid.isOpened()):
 		_,frame = vid.read()
 		frame = imutils.resize(frame,width=WIDTH)
+		ret,frame = cv2.imencode('.jpg',frame)
 		#encoded,buffer = cv2.imencode('.jpg',frame,[cv2.IMWRITE_JPEG_QUALITY,80])
+		#print('frame')
+		#print(frame)
 		message = base64.b64encode(frame)
+		#print('message')
+		print(message)
 		#print(len(message))
-		server_socket.sendto(message,('10.136.49.55', 6000))
+		#print(frame.shape)
+		server_socket.sendto(message,('10.136.140.5', 6000))
 		#frame = cv2.putText(frame,'FPS: '+str(fps),(10,40),cv2.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255),2)
-		cv2.imshow('TRANSMITTING VIDEO',frame)
+		#cv2.imshow('TRANSMITTING VIDEO',frame)
 		key = cv2.waitKey(1) & 0xFF
 		if key == ord('q'):
 			server_socket.close()
@@ -42,4 +48,4 @@ while True:
 			except:
 				pass
 		cnt+=1
-
+		time.sleep(.5)
