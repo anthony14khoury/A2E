@@ -54,7 +54,7 @@ def add_spaces(text, cache = []):
     answer = ""
     temp = []
     #ipdb.set_trace(context=6)
-    if words[0] < 1e-40:
+    if words[0] < 0:
         answer = "-".join(text)
         temp.append(answer)
     else:
