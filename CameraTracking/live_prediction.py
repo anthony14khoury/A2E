@@ -65,6 +65,12 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
         # Stay open while the camera is activated
         while cap.isOpened():
 
+            curr_sen = []
+            curr_letters = ""
+            temp = []
+            nullCount = 0
+            triggerNextBubble = false
+
             FRAME_STORE = []
             hands_count = 0
 
@@ -102,17 +108,41 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
                     cv2.destroyAllWindows()
                     quit()
 
+            if hands_count == 0:
+                print("Nothing")
+                nullCount += 1
+                if nullCount >= 2:              #Edit here for number of empty signs before newline
+                    triggerNextBubble = true
+                    curr_sen = []
+                    curr_letters = ""
+                    temp = []
+                    nullCount = 0
             if hands_count > 0:
                 prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
                 char_index = np.argmax(prediction)
                 confidence = round(prediction[0,char_index]*100, 1)
                 predicted_char = letters[char_index]
-                s.send(predicted_char)
-                print(predicted_char, confidence)
+                #s.send(predicted_char)
+                #print(predicted_char, confidence)
+                if len(predicted_char) > 1:
+                    nullCount = 0
+                    curr_sen = np.concatenate((curr_sen,temp))
+                    curr_sen = np.append(curr_sen,predicted_char)
+                    curr_letters = ""
+                    temp = []
+                else:
+                    nullCount = 0
+                    curr_letters += predicted_char
+                answer, temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
+                s.send(answer)
+                print(answer)
+            if triggerNextBubble:
+                triggerNextBubble = false
+                s.send("/n")
 
-            else:
-                print("Nothing")
-
+            #else:
+                #print("Nothing")
+                
 
             """ Continuous Camera Share """
             timeout = time.time() + 1

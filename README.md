@@ -36,6 +36,7 @@
     - PyEnchant
     - wordfreq
     - pandas
+    - nltk
 
 
 ## Important Files in Camera Tracking
