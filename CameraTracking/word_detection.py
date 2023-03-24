@@ -23,7 +23,7 @@ def split_text(text, cache = []):
         #ipdb.set_trace(context=6)
         if (len(word) > 1) or (word == "a") or (word == "i"):
           f = word_frequency(word,"en")
-          if f > 5e-6:
+          if f > 4e-6:
              if cache == []:
                  curr_pos = nltk.pos_tag([word])
                  p = tags_df.loc['.', curr_pos[0][1]]
@@ -35,7 +35,7 @@ def split_text(text, cache = []):
              if remainder != "":
                  remainder_p, remainder = split_text(remainder, cache + curr_pos)
                  p *= remainder_p
-             if p > best_p:
+             if (p > best_p) and (p > 0):
                  best_p = p
                  #ipdb.set_trace(context=6)
                  if remainder != "":
