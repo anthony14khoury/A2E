@@ -1,9 +1,9 @@
+from parameters import Params, extract_hand_keypoints
 from keras.models import load_model
-import cv2
+import mediapipe as mp
 import numpy as np
 import time
-import mediapipe as mp
-from parameters import Params, mediapipe_detection, extract_hand_keypoints
+import cv2
 import socket
 # from word_detection import add_spaces
 
@@ -11,7 +11,10 @@ import socket
 params = Params()
 
 # ML Model
-model = load_model('./Models/128_26_15_model_tanh.h5')
+try:
+    model = load_model("./Models/128_26_15_model_tanh.h5")
+except:
+    model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
 letters = params.LETTERS
 
 # Mediapipe Modules
@@ -23,7 +26,7 @@ mp_hands = mp.solutions.hands
 getReady = "Prepare to Sign!"
 go = "Go!"
 font = cv2.FONT_HERSHEY_SIMPLEX
-color = (255,0,255)
+color = (255,255,255)
 fontScale = 1
 thickness = 2
 
@@ -47,86 +50,99 @@ def draw_styled_landmarks(image, results):
 
 
 # Use CV2 Functionality to create a Video Stream
-# cap = cv2.VideoCapture(0, cv2.CAP_ANY)
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+# cap = cv2.VideoCapture(0)
 while not cap.isOpened():
     pass
 print("Camera is connected")
 
+
+cv2.namedWindow("WindowOutput")
 with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # connect to socket
+        s.connect((HOST, PORT))
+        # Stay open while the camera is activated
+        while cap.isOpened():
 
-    # Stay open while the camera is activated
-    while cap.isOpened():
-        
-        FRAME_STORE = []
-        
-        # Loop through all of the frames
-        for frame_num in range(params.FRAME_COUNT):
-            
-            # Capture a frame
-            success, image = cap.read()
-            
-            # Error Checking
-            if not success:
-                print("Ignoring Empty Camera Frame")
-                continue
-            
-            # Made detections
-            image.flags.writeable = False
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            results = hands.process(image)
-            
-            image.flags.writeable = True
-            # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            image = draw_styled_landmarks(image, results)
-            FRAME_STORE.append(extract_hand_keypoints(results))
-            
-            # Display Image
-            cv2.imshow('OpenCV Feed', image)
+            FRAME_STORE = []
+            hands_count = 0
 
-            # Breaking gracefully
-            if cv2.waitKey(5) & 0xFF == ord('q'):
-                cap.release()
-                cv2.destroyAllWindows()
-                quit()
+            # Loop through all of the frames
+            for frame_num in range(params.FRAME_COUNT):
+
+                # Capture a frame
+                success, image = cap.read()
+
+                # Error Checking
+                if not success:
+                    print("Ignoring Empty Camera Frame")
+                    continue
+
+                # Make detections
+                image.flags.writeable = False
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                results = hands.process(image)
+
+                if results.multi_handedness != None:
+                    hands_count += len(results.multi_handedness)
+
+                # Draw the Detections on the hand (comment out for PI predictions)
+                image.flags.writeable = True
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Don't need this if you are drawing landmarks
+                image = draw_styled_landmarks(image, results)
+                FRAME_STORE.append(extract_hand_keypoints(results))
+
+                # Display Image
+                cv2.imshow('WindowOutput', image)
+
+                # Breaking gracefully
+                if cv2.waitKey(5) & 0xFF == ord('q'):
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    quit()
+
+            if hands_count > 0:
+                prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
+                char_index = np.argmax(prediction)
+                confidence = round(prediction[0,char_index]*100, 1)
+                predicted_char = letters[char_index]
+                s.send(predicted_char)
+                print(predicted_char, confidence)
+
+            else:
+                print("Nothing")
 
 
-        prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
-        char_index = np.argmax(prediction)
-        confidence = round(prediction[0,char_index]*100, 1)
-        predicted_char = letters[char_index]
-        print(predicted_char, confidence)
-        
-        # if len(predicted_char) > 1:
-        #     #ipdb.set_trace()
-        #     curr_sen = np.concatenate((curr_sen,temp))
-        #     curr_letters = ""
-        #     curr_sen = np.append(curr_sen,predicted_char)
-        #     temp = []
-        # else:
-        #     curr_letters += predicted_char
-        #     answer,temp = add_spaces(curr_letters, curr_sen)  #Print out most likely placement of spaces, add dashes if none found
-        
-        # print(answer)
-        
-        
-        """ Continuous Camera Share """
-        timeout = time.time() + 2
-        while True:
-                    
-            if time.time() > timeout:
-                break
+            """ Continuous Camera Share """
+            timeout = time.time() + 1
+            while time.time() < timeout:
 
-            # Read Feed
-            ret, frame = cap.read()
-                
-            # Show to screen
-            to_screen = "{}: {}%".format(predicted_char, confidence)
-            image = cv2.putText(image, to_screen, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
-            cv2.imshow('OpenCV Feed', image)
-                
-            # Breaking gracefully
-            if cv2.waitKey(5) & 0xFF == ord('q'):
-                cap.release()
-                cv2.destroyAllWindows()
-                quit()
+                # Read Feed
+                success, image2 = cap.read()
+
+                image.flags.writeable = False
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                # image.flags.writeable = True
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Don't need this if you are drawing landmarks
+
+                cv2.imshow('WindowOutput', image2)
+
+                # Show to screen
+                # image = cv2.putText(image, getReady, (int(len(image[0])/2)-200, int(len(image)/2)), font, fontScale, color, thickness, cv2.LINE_AA)
+                # cv2.imshow('OpenCV Feed', image)
+
+
+
+    # if len(predicted_char) > 1:
+            #     #ipdb.set_trace()
+            #     curr_sen = np.concatenate((curr_sen,temp))
+            #     curr_letters = ""
+            #     curr_sen = np.append(curr_sen,predicted_char)
+            #     temp = []
+            # else:
+            #     curr_letters += predicted_char
+            #     answer,temp = add_spaces(curr_letters, curr_sen)  #Print out most likely placement of spaces, add dashes if none found
+
+            # print(answer)
