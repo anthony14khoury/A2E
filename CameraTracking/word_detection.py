@@ -47,13 +47,12 @@ def split_text(text, cache = []):
 
 
 def add_spaces(text, cache = []):
-    temp = []
-    #ipdb.set_trace();
-    if len(cache) != 0:
+    #ipdb.set_trace()
+    if cache != []:
         cache = nltk.pos_tag(cache)
     words = split_text(text, cache)
-    #ipdb.set_trace();
     answer = ""
+    temp = []
     #ipdb.set_trace(context=6)
     if words[0] < 1e-40:
         answer = "-".join(text)
@@ -62,6 +61,7 @@ def add_spaces(text, cache = []):
         for i in words[1]:
             temp.append(i[0])
     answer = ""
+    #ipdb.set_trace()
     for i in cache:
         answer = answer + i[0] + " "
     for i in temp:

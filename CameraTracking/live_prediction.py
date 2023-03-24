@@ -56,6 +56,13 @@ print("Camera is connected")
 with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
 
     # Stay open while the camera is activated
+
+    curr_sen = []
+    curr_letters = ""
+    temp = []
+    nullCount = 0
+    triggerNextBubble = false
+
     while cap.isOpened():
         
         FRAME_STORE = []
@@ -97,17 +104,29 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
         predicted_char = letters[char_index]
         print(predicted_char, confidence)
         
-        # if len(predicted_char) > 1:
-        #     #ipdb.set_trace()
-        #     curr_sen = np.concatenate((curr_sen,temp))
-        #     curr_letters = ""
-        #     curr_sen = np.append(curr_sen,predicted_char)
-        #     temp = []
-        # else:
-        #     curr_letters += predicted_char
-        #     answer,temp = add_spaces(curr_letters, curr_sen)  #Print out most likely placement of spaces, add dashes if none found
-        
-        # print(answer)
+        if predicted_char == "nothing":
+            nullCount += 1
+            if nullCount >= 2:              #Edit here for number of empty signs before newline
+                triggerNextBubble = true
+                curr_sen = []
+                curr_letters = ""
+                temp = []
+                nullCount = 0
+        elif len(predicted_char) > 1:
+            nullCount = 0
+            #ipdb.set_trace()
+            curr_sen = np.concatenate((curr_sen,temp))
+            curr_sen = np.append(curr_sen,predicted_char)
+            curr_letters = ""
+            temp = []
+        else:
+            nullCount = 0
+            curr_letters += predicted_char
+        answer, temp = add_spaces(curr_letters, curr_sen)         #Print out most likely placement of spaces, add dashes if none found
+        print(answer)
+
+
+        #socket.send(
         
         
         """ Continuous Camera Share """
