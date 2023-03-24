@@ -56,9 +56,9 @@ print("All Data is Loaded")
 
 
 try:
-     model = load_model("./Models/256_26_15_model_tanh.h5")
+     model = load_model("./Models/256_full_tanh_model.h5")
 except:
-     model = load_model("./A2E/CameraTracking/Models/256_26_15_model_tanh.h5")
+     model = load_model("./A2E/CameraTracking/Models/256_full_tanh_model.h5")
 print("Model is Loaded")
 
 
