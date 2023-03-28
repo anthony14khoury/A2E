@@ -13,14 +13,16 @@ drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
 num_of_reader_procs = 4
-
-fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
-model = load_model('Models/Old/abcefjnothing2.h5')
+done = False
+try:
+    model = load_model("./Models/128_26_15_model_tanh.h5")
+except:
+    model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
+letters = params.LETTERS
 
 def initialize():
     global hands
-    hands = handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,
+    hands = handsModule.Hands(model_complexity=0,static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5,
                              max_num_hands=2)
 def extract_keypoints(results):
     lh = np.zeros(21 * 3)
@@ -49,15 +51,20 @@ def worker(data):
 
 def my_generator():
     # Use CV2 Functionality to create a Video stream and add some values
-    cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+    cap = cv2.VideoCapture(2)
+    global done
     while True:
         num = 0
+        t0 = time.time()
         while(num < 30):
             ret, frame = cap.read()
             frame = cv2.resize(frame, (640, 480))
             num = num + 1
             yield frame
-        time.sleep(2)
+        while(done == False):
+            pass
+        done = False
+        print(time.time()-t0)
 
 if __name__ == '__main__':
 
@@ -78,6 +85,8 @@ if __name__ == '__main__':
             predicted_char = letters[char_index]
             print(predicted_char, confidence)
             temp = []
+            time.sleep(2)
+            done = True
             num = 0
 
 
