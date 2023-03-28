@@ -12,18 +12,16 @@ params = Params()
 drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
-# Use CV2 Functionality to create a Video stream and add some values
-cap = cv2.VideoCapture(0, cv2.CAP_ANY)
-
 num_of_reader_procs = 4
 
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 letters = np.array(['a', 'b', 'c', 'e', 'f', 'j', 'nothing'])
-model = load_model('Models/abcefjnothing2.h5')
+model = load_model('Models/Old/abcefjnothing2.h5')
 
-hands = handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,
-                          max_num_hands=2)
-
+def initialize():
+    global hands
+    hands = handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,
+                             max_num_hands=2)
 def extract_keypoints(results):
     lh = np.zeros(21 * 3)
     rh = np.zeros(21 * 3)
@@ -40,6 +38,7 @@ def extract_keypoints(results):
 
 
 def process_data(data):
+    global hands
     results = hands.process(cv2.cvtColor(data, cv2.COLOR_BGR2RGB))
     # In case the system sees multiple hands this if statment deals with that and produces another hand overlay
     keypoints = extract_keypoints(results)
@@ -49,6 +48,8 @@ def worker(data):
     return data
 
 def my_generator():
+    # Use CV2 Functionality to create a Video stream and add some values
+    cap = cv2.VideoCapture(0, cv2.CAP_ANY)
     while True:
         num = 0
         while(num < 30):
@@ -59,8 +60,9 @@ def my_generator():
         time.sleep(2)
 
 if __name__ == '__main__':
+
     # create pools
-    input_pool = multiprocessing.Pool(processes=4)
+    input_pool = multiprocessing.Pool(processes=4, initializer=initialize)
     output_pool = multiprocessing.Pool(processes=1)
 
     # continuously print resultsa

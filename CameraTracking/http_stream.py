@@ -2,9 +2,8 @@ import cv2
 from flask import Flask, Response
 
 app = Flask(__name__)
-cap = cv2.VideoCapture(0)
 
-def gen_frames():
+def gen_frames(cap):
     while True:
         success, frame = cap.read()
         if not success:
@@ -18,7 +17,8 @@ def gen_frames():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    cap = cv2.VideoCapture(0)
+    return Response(gen_frames(cap), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     # Listen on the public IP address of the server
