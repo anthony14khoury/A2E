@@ -12,9 +12,9 @@ FRAME_STORE = []
 
 # ML Model
 try:
-    model = load_model("./Models/128_26_15_model_tanh.h5")
+    model = load_model("./Models/128_full_tanh_model.h5")
 except:
-    model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
+    model = load_model("./A2E/CameraTracking/Models/128_full_tanh_model.h5")
 letters = params.LETTERS
 
 
@@ -22,7 +22,7 @@ letters = params.LETTERS
 # Define a function to process each frame
 def process_frame(frame):
      # Initialize mediapipe
-     mp_hands = mp.solutions.hands.Hands()
+     mp_hands = mp.solutions.hands.Hands(model_complexity=0, max_num_hands=2)
 
      # Convert the frame to RGB
      frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -32,7 +32,7 @@ def process_frame(frame):
      FRAME_STORE.append(extract_hand_keypoints(results))
 
      # Print the results
-     print(results)
+     # print(results)
 
      # Release the resources
      mp_hands.close()
@@ -42,7 +42,7 @@ def process_frame(frame):
 
 
 # Open the video capture device
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 
 # Loop through the frames
 count = 0
@@ -53,7 +53,7 @@ while True:
           break
      count += 1
      
-     if count >= 30:
+     if count > 30:
           prediction = model.predict(np.expand_dims(FRAME_STORE, axis=0))
           char_index = np.argmax(prediction)
           confidence = round(prediction[0,char_index]*100, 1)
