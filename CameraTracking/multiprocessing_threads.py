@@ -22,7 +22,7 @@ letters = params.LETTERS
 
 
 # Define the function to process each image
-def process_image(image):
+def process_image(image, results):
      # with mp.solutions.hands.Hands() as hands:
      #      results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
      #      # Do something with the results, e.g. extract hand landmarks
@@ -32,27 +32,27 @@ def process_image(image):
 
      image.flags.writeable = False
      image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-     results = hands.process(image)
+     results_var = hands.process(image)
 
      lh = np.zeros(21*3)
      rh = np.zeros(21*3)
      
-     if results.multi_hand_landmarks:
-          for hand_landmarks in results.multi_hand_landmarks:
+     if results_var.multi_hand_landmarks:
+          for hand_landmarks in results_var.multi_hand_landmarks:
                # Get hand index to check label (left or right)
-               handIndex = results.multi_hand_landmarks.index(hand_landmarks)
-               handLabel = results.multi_handedness[handIndex].classification[0].label
+               handIndex = results_var.multi_hand_landmarks.index(hand_landmarks)
+               handLabel = results_var.multi_handedness[handIndex].classification[0].label
                if(handLabel == "Right"):
                     lh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
                else:
                     rh = np.array([[landmark.x, landmark.y, landmark.z] for landmark in hand_landmarks.landmark]).flatten()
-     
-     return np.concatenate([lh, rh])
+     results.append(np.concatenate([lh, rh]))
+     # return np.concatenate([lh, rh])
 
 
 
 # Open the video capture device
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 
 # Loop through the frames
 FRAME_STORE = []
@@ -72,11 +72,12 @@ with mp_hands.Hands(model_complexity=0, max_num_hands=2) as hands:
                time.sleep(0.075)
                
           print("Get 30 frames with delay: ", time.time() - t1)
-               
+          
           threads = []
           results = []
           for image in FRAME_STORE:
-               t = threading.Thread(target=lambda r, i: r.append(process_image(i)), args=(results, image))
+               # t = threading.Thread(target=lambda r, i: r.append(process_image(i)), args=(results, image))
+               t = threading.Thread(target=process_image, args=(image, results))
                threads.append(t)
                t.start()
           for t in threads:
