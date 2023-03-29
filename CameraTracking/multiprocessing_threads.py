@@ -75,13 +75,17 @@ with mp_hands.Hands(model_complexity=0, max_num_hands=2) as hands:
           
           threads = []
           results = []
-          for image in FRAME_STORE:
-               # t = threading.Thread(target=lambda r, i: r.append(process_image(i)), args=(results, image))
-               t = threading.Thread(target=process_image, args=(image, results))
-               threads.append(t)
-               t.start()
-          for t in threads:
-               t.join()
+          for i in range(10):
+              for j in range(i*3,i*3+3):
+                   print(j)
+                   # t = threading.Thread(target=lambda r, i: r.append(process_image(i)), args=(results, image))
+                   t = threading.Thread(target=process_image, args=(FRAME_STORE[j], results))
+                   threads.append(t)
+                   t.start()
+              for k in range(i*3,i*3+3):
+                   threads[k].join()
+                   print("joining",k)
+               
           
           total_results = []
           for landmarks in results:
