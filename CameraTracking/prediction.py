@@ -44,7 +44,7 @@ async def extract_hand_keypoints(result):
     return np.concatenate([lh, rh])
 
 # Use CV2 Functionality to create a Video Stream
-cap = cv2.VideoCapture(0, cv2.CAP_ANY)
+cap = cv2.VideoCapture(2, cv2.CAP_ANY)
 while not cap.isOpened():
     pass
 print("Camera is connected")
