@@ -1,7 +1,7 @@
 from parameters import Params
 from sklearn.metrics import confusion_matrix, accuracy_score
 from keras.models import load_model
-import mediapipe as mp
+from mediapipe.solutions import hands
 import numpy as np
 import cv2
 import os

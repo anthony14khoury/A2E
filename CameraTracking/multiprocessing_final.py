@@ -5,7 +5,8 @@ import numpy as np
 from keras.models import load_model
 from parameters import Params
 import time as time
-import multiprocessing as multiprocessing
+# import multiprocessing as multiprocessing
+from multiprocessing import Pool
 
 params = Params()
 # Use MediaPipe to draw the hand framework over the top of hands it identifies in Real-Time
@@ -20,8 +21,8 @@ model = load_model('Models/Old/abcefjnothing2.h5')
 
 def initialize():
     global hands
-    hands = handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,
-                             max_num_hands=2)
+    hands = handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2)
+
 def extract_keypoints(results):
     lh = np.zeros(21 * 3)
     rh = np.zeros(21 * 3)
@@ -62,15 +63,17 @@ def my_generator():
 if __name__ == '__main__':
 
     # create pools
-    input_pool = multiprocessing.Pool(processes=4, initializer=initialize)
-    output_pool = multiprocessing.Pool(processes=1)
+    input_pool = Pool(processes=4, initializer=initialize)
+    output_pool = Pool(processes=1)
 
     # continuously print resultsa
     num = 0
     temp = []
     for result in output_pool.imap(func=worker, iterable=input_pool.imap(func=process_data, iterable=my_generator())):
+        
         num += 1
         temp.append(result)
+        
         if(num == 30):
             prediction = model.predict(np.expand_dims(temp, axis=0))
             char_index = np.argmax(prediction)
