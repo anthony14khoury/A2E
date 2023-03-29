@@ -9,16 +9,10 @@ import multiprocessing as multiprocessing
 
 params = Params()
 # Use MediaPipe to draw the hand framework over the top of hands it identifies in Real-Time
-drawingModule = mediapipe.solutions.drawing_utils
-handsModule = mediapipe.solutions.hands
 
 num_of_reader_procs = 4
 done = False
-try:
-    model = load_model("./Models/128_26_15_model_tanh.h5")
-except:
-    model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
-letters = params.LETTERS
+done2 = False
 
 def initialize():
     global hands
@@ -53,21 +47,36 @@ def my_generator():
     # Use CV2 Functionality to create a Video stream and add some values
     cap = cv2.VideoCapture(2)
     global done
+    global done2
     while True:
         num = 0
         t0 = time.time()
+        FRAME_STORE = []
+        print("go")
         while(num < 30):
+            time.sleep(0.05)
             ret, frame = cap.read()
             frame = cv2.resize(frame, (640, 480))
             num = num + 1
-            yield frame
+            #yield frame
+            FRAME_STORE.append(frame)
+        print("done collecting")
+        for i in range(30):
+            yield FRAME_STORE[i]
         while(done == False):
             pass
         done = False
         print(time.time()-t0)
+        while(done2 == False):
+            pass
+        done2 = True
 
 if __name__ == '__main__':
-
+    try:
+        model = load_model("./Models/128_26_15_model_tanh.h5")
+    except:
+        model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
+    letters = params.LETTERS
     # create pools
     input_pool = multiprocessing.Pool(processes=4, initializer=initialize)
     output_pool = multiprocessing.Pool(processes=1)
@@ -85,8 +94,9 @@ if __name__ == '__main__':
             predicted_char = letters[char_index]
             print(predicted_char, confidence)
             temp = []
-            time.sleep(2)
             done = True
+            time.sleep(2)
+            done2 = True
             num = 0
 
 

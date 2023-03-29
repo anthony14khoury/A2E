@@ -12,7 +12,7 @@ params = Params()
 
 # ML Model
 try:
-    model = load_model("./Models/128_26_15_model_tanh.h5")
+    model = load_model("./Models/96_full_tanh_model.h5")
 except:
     model = load_model("./A2E/CameraTracking/Models/128_26_15_model_tanh.h5")
 letters = params.LETTERS
