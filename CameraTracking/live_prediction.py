@@ -28,7 +28,7 @@ PORT = 4000 # The port used by the server
 
 
 # Use CV2 Functionality to create a Video Stream
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 # cap = cv2.VideoCapture(0)
 while not cap.isOpened():
     pass
@@ -45,11 +45,12 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
             FRAME_STORE = []
             IMAGE_STORE = []
             hands_count = 0
-
+            t = time.time()
             for frame_num in range(params.FRAME_COUNT):
                 success, image = cap.read()
                 IMAGE_STORE.append(image)
-
+                time.sleep(.07)
+            print("recording took: ", time.time()-t)
             # Loop through all of the frames
             t0 = time.time()
             for frame_num in range(params.FRAME_COUNT):
@@ -67,7 +68,7 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
                 image.flags.writeable = False
                 t2 = time.time()
                 results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-                print("hands.process took: ", time.time()-t2)
+               # print("hands.process took: ", time.time()-t2)
 
                 if results.multi_handedness != None:
                     hands_count += len(results.multi_handedness)
@@ -77,7 +78,7 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
                 #image = draw_styled_landmarks(image, results)
                 t3 = time.time()
                 FRAME_STORE.append(extract_hand_keypoints(results))
-                print("extract keypoints took:", time.time()-t3)
+               # print("extract keypoints took:", time.time()-t3)
                 # Display Image
                 #cv2.imshow('WindowOutput', image)
 

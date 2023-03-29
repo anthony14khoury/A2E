@@ -22,7 +22,7 @@ letters = params.LETTERS
 
 def initialize():
     global hands
-    hands = handsModule.Hands(model_complexity=0,static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5,
+    hands = mediapipe.solutions.hands.Hands(model_complexity=0,static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5,
                              max_num_hands=2)
 def extract_keypoints(results):
     lh = np.zeros(21 * 3)

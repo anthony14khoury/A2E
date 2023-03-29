@@ -1,16 +1,17 @@
 import cv2
 from flask import Flask, Response
-
+import time
 app = Flask(__name__)
 
 def gen_frames(cap):
     while True:
+        time.sleep(0.05)
         success, frame = cap.read()
         if not success:
             break
         else:
             # Encode the frame as JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
+            ret, buffer = cv2.imencode('.jpeg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
