@@ -58,7 +58,6 @@ while not cap.isOpened():
 print("Camera is connected")
 
 
-cv2.namedWindow("WindowOutput")
 with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
     # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # connect to socket
