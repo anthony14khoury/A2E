@@ -26,22 +26,9 @@ HOST = "10.136.49.55" # The server's hostname or IP address
 PORT = 4000 # The port used by the server
 
 
-def draw_styled_landmarks(image, results):
-    
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(image, hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
-            
-    return image
-
 
 # Use CV2 Functionality to create a Video Stream
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture(0)
 while not cap.isOpened():
     pass
@@ -56,7 +43,12 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
         while cap.isOpened():
 
             FRAME_STORE = []
+            IMAGE_STORE = []
             hands_count = 0
+
+            for frame_num in range(params.FRAME_COUNT):
+                success, image = cap.read()
+                IMAGE_STORE.append(image)
 
             # Loop through all of the frames
             t0 = time.time()
@@ -64,12 +56,12 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
                 print(frame_num)
                 t1 = time.time()
                 # Capture a frame
-                success, image = cap.read()
-                print("image read time:", time.time()-t1)
+                image = IMAGE_STORE[frame_num]
+                #print("image read time:", time.time()-t1)
                 # Error Checking
-                if not success:
-                    print("Ignoring Empty Camera Frame")
-                    continue
+                # if not success:
+                #     print("Ignoring Empty Camera Frame")
+                #     continue
 
                 # Make detections
                 image.flags.writeable = False
