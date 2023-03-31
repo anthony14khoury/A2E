@@ -42,9 +42,9 @@ def draw_styled_landmarks(image, results):
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
             mp_drawing.draw_landmarks(image, hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
+            mp_hands.HAND_CONNECTIONS,
+            mp_drawing_styles.get_default_hand_landmarks_style(),
+            mp_drawing_styles.get_default_hand_connections_style())
             
     return image
 
@@ -88,8 +88,8 @@ with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.7, min_tracki
                     hands_count += len(results.multi_handedness)
 
                 # Draw the Detections on the hand (comment out for PI predictions)
-                image.flags.writeable = True
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Don't need this if you are drawing landmarks
+                # image.flags.writeable = True
+                # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Don't need this if you are drawing landmarks
                 image = draw_styled_landmarks(image, results)
                 FRAME_STORE.append(extract_hand_keypoints(results))
 

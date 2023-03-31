@@ -14,7 +14,7 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-collection_folder = 'ValidationData'
+collection_folder = 'DataCollection'
 
 # Collection Types: "video" or "static"
 type = "video"
@@ -43,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'my'
+     letter = 'm'
      
      # Create Folder
      try:
@@ -71,13 +71,14 @@ if type == "video":
                SEQUENCE_STORE = []
                for sequence in range(params.SEQUENCE_COUNT):
                     FRAME_STORE = []
+                    t1 = time.time()
                     for frame_num in range(params.FRAME_COUNT):
                                                   
                          # Capture a frame
                          success, image = cap.read()
                          
                          # if sequence % 2 == 0:
-                         # image = cv2.flip(image, 1)
+                         image = cv2.flip(image, 1)
                          
                          # Error Checking
                          if not success:
@@ -102,12 +103,14 @@ if type == "video":
                               cap.release()
                               cv2.destroyAllWindows()
                               quit()
+                         
+                         time.sleep(0.04)
                     
                     print('Handedness:', results.multi_handedness)
                     
                     print("Done with Sequence: {}".format(sequence))
                     SEQUENCE_STORE.append(FRAME_STORE)
-                    
+                    print("Time taken: ", time.time() - t1)
                     print("Wait 2 seconds \n")
                     time.sleep(2.0)
                     
@@ -119,7 +122,7 @@ if type == "video":
                target_folder = os.path.join(os.path.join(collection_folder), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+80), set_of_frames)
                     
                
                print("\n Program is Finished \n")
