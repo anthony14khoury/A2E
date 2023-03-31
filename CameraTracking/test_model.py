@@ -1,5 +1,5 @@
 from parameters import Params
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import accuracy_score
 from keras.models import load_model
 import mediapipe as mp
 import numpy as np
@@ -58,24 +58,22 @@ print("All Data is Loaded")
 
 
 try:
-     model = load_model("./Models/256_full_tanh_model.h5")
+     model = load_model("./Models/128_full_tanh_model.h5")
 except:
-     model = load_model("./A2E/CameraTracking/Models/256_full_tanh_model.h5")
+     model = load_model("./A2E/CameraTracking/Models/128_full_tanh_model.h5")
 print("Model is Loaded")
 
 
 
-# accuracies, num_per_label = [], []
 predictions = []
 for (label, sequence) in zip(labels, sequences):
-     # accuracy_count, label_count = 0, 0
      
      prediction = model.predict(np.expand_dims(sequence, axis=0), verbose=0)
      char_index = np.argmax(prediction)
      confidence = round(prediction[0,char_index]*100, 1)
      predicted_char = letters[char_index]
      
-     # print("Actual: {} | Predicted: {} | Confidence: {}%".format(label, predicted_char, confidence))
+     print("Actual: {} | Predicted: {} | Confidence: {}%".format(label, predicted_char, confidence))
 
      predictions.append(predicted_char)
      
@@ -88,14 +86,8 @@ for label in unique_labels:
      predicted_labels_subset = [predictions[i] for i in indices]
      accuracy = accuracy_score(true_labels_subset, predicted_labels_subset)
      
-     # if label == 'e': accuracy = 0.82
-     # elif label == 'i' or 'z': accuracy = 1.0
-     # elif label == 'o': accuracy = 0.9
-     # elif label == 'k': accuracy = 0.86
-         
      print("Letter: {} | Accuracy: {}".format(label, accuracy))
 
           
 accuracy = sum(1 for x,y in zip(labels, predictions) if x == y) / len(labels)
-# accuracy = 0.92
 print("\nTotal Accuracy: {}%".format(100*accuracy))

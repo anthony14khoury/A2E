@@ -6,7 +6,7 @@ class Params():
           self.FRAME_STORE = []
           self.SEQUENCE_STORE = []
           self.FRAME_COUNT = 30
-          self.SEQUENCE_COUNT = 25
+          self.SEQUENCE_COUNT = 20
           self.LETTERS = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'nothing', 'again', 'can', 'drink', 'family', 'hello', 'how are you', 'me', 'my', 'name is', 'nice to meet you', 'no', 'please', 'sorry', 'thank you', 'yes'])
 
 
