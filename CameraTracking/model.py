@@ -1,6 +1,6 @@
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from sklearn.model_selection import train_test_split
-from keras.utils import to_categorical # for windows
+from keras.utils import to_categorical
 # from tensorflow.keras.utils import to_categorical # for linux
 from keras.layers import LSTM, Dense
 from keras.models import Sequential

@@ -20,7 +20,7 @@ captured_count = 0
 params = Params()
 letters = params.LETTERS
 # test_letters = letters
-test_letters = ['a', 'again', 'b', 'c', 'can', 'd', 'drink', 'e', 'f', 'family', 'g', 'h', 'hello', 'i', 'j', 'k', 'l', 'm', 'me', 'my', 'n', 'name is', 'no', 'nothing', 'o', 'p', 'please', 'q', 'r', 's', 'sorry', 't', 'thank you', 'u', 'v', 'w', 'x', 'y', 'yes', 'z']
+test_letters = ['a', 'again', 'b', 'c', 'can', 'd', 'drink', 'e', 'f', 'family', 'g', 'h', 'hello', 'how are you', 'i', 'j', 'k', 'l', 'm', 'me', 'my', 'n', 'name is', 'nice to meet you', 'no', 'nothing', 'o', 'p', 'please', 'q', 'r', 's', 'sorry', 't', 'thank you', 'u', 'v', 'w', 'x', 'y', 'yes', 'z']
 # print(len(test_letters))
 # test_letters = ['my']
 # letters removed = how are you
@@ -36,19 +36,15 @@ else:
 for subdir, dirs, files in os.walk(collection_folder):
      if subdir.split('\\')[-1] in test_letters:
           for file in files:
+               print(file)
                labels.append(subdir.split('\\')[-1])
 
 
           
-          
 sequences = []
 for letter in test_letters:
      try:
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
-          
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))          
-          
+          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))                   
           for i in range(0, dir_length):
                sequences.append(np.load(os.path.join(collection_folder, letter, letter + str(i) + ".npy")))
      except:
@@ -58,9 +54,9 @@ print("All Data is Loaded")
 
 
 try:
-     model = load_model("./Models/128_full_tanh_model.h5")
+     model = load_model("./Models/192_tanh_model.h5")
 except:
-     model = load_model("./A2E/CameraTracking/Models/128_full_tanh_model.h5")
+     model = load_model("./A2E/CameraTracking/Models/192_tanh_model.h5")
 print("Model is Loaded")
 
 

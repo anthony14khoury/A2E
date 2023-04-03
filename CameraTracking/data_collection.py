@@ -14,7 +14,7 @@ mp_hands = mp.solutions.hands
 params = Params()
 
 # Collection Variables
-collection_folder = 'DataCollection'
+collection_folder = 'ValidationData'
 
 # Collection Types: "video" or "static"
 type = "video"
@@ -43,7 +43,7 @@ def draw_styled_landmarks(image, results):
 
 if type == "video":
      
-     letter = 'm'
+     letter = 'my'
      
      # Create Folder
      try:
@@ -122,7 +122,7 @@ if type == "video":
                target_folder = os.path.join(os.path.join(collection_folder), letter)
                for i in range(params.SEQUENCE_COUNT):
                     set_of_frames = np.array(SEQUENCE_STORE[i])
-                    np.save(target_folder + "/" + letter + str(i+80), set_of_frames)
+                    np.save(target_folder + "/" + letter + str(i+0), set_of_frames)
                     
                
                print("\n Program is Finished \n")
