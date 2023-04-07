@@ -1,6 +1,7 @@
 import cv2
 from flask import Flask, Response
 import time
+import socket
 app = Flask(__name__)
 
 def gen_frames(cap):
@@ -22,5 +23,9 @@ def video_feed():
     return Response(gen_frames(cap), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
     # Listen on the public IP address of the server
-    app.run(host='10.192.184.58', port=5000, debug=True)
+    app.run(host=str(ip), port=5000, debug=True)
