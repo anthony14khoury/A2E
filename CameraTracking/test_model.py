@@ -1,5 +1,5 @@
 from parameters import Params
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import accuracy_score
 from keras.models import load_model
 import mediapipe as mp
 import numpy as np
@@ -19,9 +19,11 @@ captured_count = 0
 
 params = Params()
 letters = params.LETTERS
-test_letters = ['a', 'again', 'b', 'c', 'can', 'd', 'drink', 'e', 'f', 'family', 'g', 'h', 'hello', 'i', 'j', 'k', 'l', 'm', 'me', 'my', 'n', 'nothing', 'o', 'p', 'please', 'q', 'r', 's', 'sorry', 't', 'thank you', 'u', 'v', 'w', 'x', 'y', 'yes', 'z']
+# test_letters = letters
+test_letters = ['a', 'again', 'b', 'c', 'can', 'd', 'drink', 'e', 'f', 'family', 'g', 'h', 'hello', 'how are you', 'i', 'j', 'k', 'l', 'm', 'me', 'my', 'n', 'name is', 'nice to meet you', 'no', 'nothing', 'o', 'p', 'please', 'q', 'r', 's', 'sorry', 't', 'thank you', 'u', 'v', 'w', 'x', 'y', 'yes', 'z']
+# print(len(test_letters))
 # test_letters = ['my']
-# letters removed = o, 
+# letters removed = how are you
 letter_count = len(test_letters)
 labels = []
 
@@ -34,19 +36,15 @@ else:
 for subdir, dirs, files in os.walk(collection_folder):
      if subdir.split('\\')[-1] in test_letters:
           for file in files:
+               print(file)
                labels.append(subdir.split('\\')[-1])
 
 
           
-          
 sequences = []
 for letter in test_letters:
      try:
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))
-          
-          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))          
-          
+          dir_length = len(os.listdir(os.path.join(collection_folder, letter)))                   
           for i in range(0, dir_length):
                sequences.append(np.load(os.path.join(collection_folder, letter, letter + str(i) + ".npy")))
      except:
@@ -56,17 +54,15 @@ print("All Data is Loaded")
 
 
 try:
-     model = load_model("./Models/256_full_tanh_model.h5")
+     model = load_model("./Models/192_tanh_model.h5")
 except:
-     model = load_model("./A2E/CameraTracking/Models/256_full_tanh_model.h5")
+     model = load_model("./A2E/CameraTracking/Models/192_tanh_model.h5")
 print("Model is Loaded")
 
 
 
-# accuracies, num_per_label = [], []
 predictions = []
 for (label, sequence) in zip(labels, sequences):
-     # accuracy_count, label_count = 0, 0
      
      prediction = model.predict(np.expand_dims(sequence, axis=0), verbose=0)
      char_index = np.argmax(prediction)
@@ -81,11 +77,12 @@ for (label, sequence) in zip(labels, sequences):
 print()
 unique_labels = sorted(list(set(labels)))
 for label in unique_labels:
-    indices = [i for i, x in enumerate(labels) if x == label]
-    true_labels_subset = [labels[i] for i in indices]
-    predicted_labels_subset = [predictions[i] for i in indices]
-    accuracy = accuracy_score(true_labels_subset, predicted_labels_subset)
-    print("Letter: {} | Accuracy: {}".format(label, accuracy))
+     indices = [i for i, x in enumerate(labels) if x == label]
+     true_labels_subset = [labels[i] for i in indices]
+     predicted_labels_subset = [predictions[i] for i in indices]
+     accuracy = accuracy_score(true_labels_subset, predicted_labels_subset)
+     
+     print("Letter: {} | Accuracy: {}".format(label, accuracy))
 
           
 accuracy = sum(1 for x,y in zip(labels, predictions) if x == y) / len(labels)

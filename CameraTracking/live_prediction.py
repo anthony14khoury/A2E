@@ -1,9 +1,9 @@
 import time
+import os
 import cv2
 import socket
 from multiprocessing import Process, Pipe
 # from word_detection import add_spaces
-
 
 def prediction(parent_conn):
     from parameters import Params, extract_hand_keypoints
@@ -11,6 +11,7 @@ def prediction(parent_conn):
     import mediapipe as mp
     import numpy as np
 
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     # Parameter Class
     params = Params()
 
