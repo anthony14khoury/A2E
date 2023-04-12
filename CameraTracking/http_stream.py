@@ -28,4 +28,4 @@ if __name__ == '__main__':
     ip = s.getsockname()[0]
     s.close()
     # Listen on the public IP address of the server
-    app.run(host=str(ip), port=5000, debug=True)
+    app.run(host=str(ip), port=5000, debug=False, threaded=True)
