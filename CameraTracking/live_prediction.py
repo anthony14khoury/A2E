@@ -64,7 +64,7 @@ def prediction(parent_conn):
                     t1 = time.time()
                     # Capture a frame
                     image = IMAGE_STORE[frame_num]
-                    #print("image read time:", time.time()-t1)
+                   # print("image read time:", time.time()-t1)
                     # Error Checking
                     # if not success:
                     #     print("Ignoring Empty Camera Frame")
@@ -74,7 +74,7 @@ def prediction(parent_conn):
                     image.flags.writeable = False
                     t2 = time.time()
                     results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-                   # print("hands.process took: ", time.time()-t2)
+                    #print("hands.process took: ", time.time()-t2)
 
                     if results.multi_handedness != None:
                         hands_count += len(results.multi_handedness)
@@ -84,7 +84,7 @@ def prediction(parent_conn):
                     #image = draw_styled_landmarks(image, results)
                     t3 = time.time()
                     FRAME_STORE.append(extract_hand_keypoints(results))
-                   # print("extract keypoints took:", time.time()-t3)
+                    #print("extract keypoints took:", time.time()-t3)
                     # Display Image
                     #cv2.imshow('WindowOutput', image)
 
@@ -116,7 +116,7 @@ def server(child_conn):
     # font
     font = cv2.FONT_HERSHEY_SIMPLEX
     # org
-    org = (320, 240)     
+    org = (35,50)
     # fontScale
     fontScale = 2       
     # Blue color in BGR
@@ -135,15 +135,18 @@ def server(child_conn):
                     display = child_conn.recv()
                     
                 if(display == 1):
-                    image = cv2.putText(frame, 'Go', org, font, 
-                       fontScale, color, thickness, cv2.LINE_AA)
+                    image = cv2.rectangle(frame, (0, 0), (140,75), color, -1)
+                    image = cv2.putText(image, 'Go', org, font, 
+                       fontScale, (255,255,255), thickness, cv2.LINE_AA)
                 elif(display == 2):
-                    image = cv2.putText(frame, 'Wait', org, font, 
-                       fontScale, color, thickness, cv2.LINE_AA)
+                    image = cv2.rectangle(frame, (0, 0), (140,75), color, -1)
+                    image = cv2.putText(image, 'Wait', (10,50), font, 
+                       fontScale, (255,255,255), thickness, cv2.LINE_AA)
                     
                 # Encode the frame as JPEG
                 ret, buffer = cv2.imencode('.jpeg', image)
                 frame = buffer.tobytes()
+
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
