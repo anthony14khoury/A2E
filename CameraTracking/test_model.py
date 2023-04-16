@@ -3,7 +3,6 @@ from sklearn.metrics import accuracy_score
 from keras.models import load_model
 import mediapipe as mp
 import numpy as np
-import cv2
 import os
 print("Import and Dependencies Loaded")
 
@@ -64,10 +63,10 @@ for (label, sequence) in zip(labels, sequences):
      
      prediction = model.predict(np.expand_dims(sequence, axis=0), verbose=0)
      char_index = np.argmax(prediction)
-     confidence = round(prediction[0,char_index]*100, 1)
+     confidence = round(prediction[0,char_index], 1)
      predicted_char = letters[char_index]
      
-     print("Actual: {} | Predicted: {} | Confidence: {}%".format(label, predicted_char, confidence*100))
+     # print("Actual: {} | Predicted: {} | Confidence: {}%".format(label, predicted_char, confidence*100))
 
      predictions.append(predicted_char)
      
