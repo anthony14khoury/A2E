@@ -6,14 +6,29 @@
 
 ## Sections
 - Machine Learning Model
-    - The current model is trained with the following letters: a, b, c, e, f, j, and "nothing"
-    - All predictions score with an accuracy of greater than 90%
+    - The current model is trained with the following letters (26) and words (16):
+
+    |         |                  |       |        |
+    | :---:   | :---:            | :---: | :---:  |
+    |  a      | b                | c     | d      |
+    |  e      | f                | g     | h      |
+    |  i      | j                | k     | l      |
+    |  m      | n                | o     | p      |
+    |  q      | r                | s     | t      |
+    |  u      | v                | w     | x      |
+    |  y      | z                |       |        |
+    | again   | can              | drink | family |
+    | hello   | how are you      | me    | my     |
+    | name is | nice to meet you | no    | please |
+    | sorry    | thank you       | yes   | nothing      |
+    
+    - The model's average prediction accuracy is 96.3%
 
 - Android Application
     - The user will sign through to the external camera and the application will output the camera stream and predictions in real-time.
 
 - Raspberry Pi
-    - All of the code and the machine learning model is loaded on to the PI to communicate directly to the application using TCP for the predictions and UDP for the video stream
+    - All of the code and the machine learning model is loaded on to the PI to communicate directly to the application using TCP for the predictions and HTTP for the video stream
 
 ## Folders
 - CameraTracking
@@ -30,12 +45,13 @@
     - cv2
     - numpy
     - matplotlib
-    - mediapipe
+    - mediapipe == 0.8.9.1
     - keras
     - sklearn
     - PyEnchant
     - wordfreq
     - pandas
+- Once all dependencies are installed, run the ```python_check.py``` script to verify everything is properly installed.
 
 
 ## Important Files in Camera Tracking
